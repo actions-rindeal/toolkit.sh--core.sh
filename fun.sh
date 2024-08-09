@@ -58,7 +58,7 @@ core.getInput() {
 }
 export -f  core.getInput
 
-core.getMultilineInput() { :; }
+core.getMultilineInput() { TODO; }
 export -f  core.getMultilineInput
 
 core.getBooleanInput() {
