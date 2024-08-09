@@ -187,6 +187,11 @@ core.prepareKeyValueMessage() {
 }
 export -f  core.prepareKeyValueMessage
 
+core._escapeData()     { printf '%s' "$1" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g'; }
+export -f  core._escapeData
+core._escapeProperty() { core._escapeData "$1" | sed -e 's/:/%3A/g' -e 's/,/%2C/g'; }
+export -f  core._escapeProperty
+
 ##########  Context  ##########################
 
 ##
