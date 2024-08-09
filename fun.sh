@@ -108,7 +108,7 @@ export -f  core.warning
 core.notice() { :; }
 export -f  core.notice
 
-core.info() { :; }
+core.info() { printf "%s\n" "${*}"; }
 export -f  core.info
 
 core.startGroup() { :; }
@@ -121,10 +121,18 @@ export -f  core.endGroup
 ## Wrapper action state
 ##-----------------------------------------------------------------------
 
-core.saveState() { :; }
+core.saveState() {
+    local name="$1" ; shift
+    local value="$1" ; shift
+    core.issueFileCommand 'STATE' "$(core.issueFileCommand "${name}" "${value}")"
+}
 export -f  core.saveState
 
-core.getState() { :; }
+core.getState() {
+    local name="$1" ; shift
+    local var="STATE_${name}"
+    [[ -v "${var}" ]] && { printf "%s" "${!var}"; } || { printf ""; }
+}
 export -f  core.getState
 
 core.getIDToken() { printf "Error: '%s' not implemented!" "${FUNCNAME}" >&2; exit 1; }
