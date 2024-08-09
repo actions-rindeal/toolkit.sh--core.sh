@@ -3,6 +3,14 @@
 # Set strict mode
 #set -euo pipefail
 
+core.exportVariable() {
+    local name="$1" ; shift
+    local value="$1" ; shift
+    export "${name}=${value}"
+    core.issueFileCommand 'ENV' "$(core.issueFileCommand "${name}" "${value}")"
+}
+export -f  core.exportVariable
+
 ## Usage:
 ##     core.setFailedAndExit  "No 'repo' input provided."
 ##     core.setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
@@ -49,16 +57,6 @@ core.prepareKeyValueMessage() {
     local value="$2"
     local delimiter="ghadelimiter_$(cat /proc/sys/kernel/random/uuid)"
     local converted_value=$(core.toCommandValue "$value")
-
-    if [[ "$key" == *"$delimiter"* ]]; then
-        printf 'Error: Unexpected input: name should not contain the delimiter "%s"\n' "$delimiter" >&2
-        return 1
-    fi
-
-    if [[ "$converted_value" == *"$delimiter"* ]]; then
-        printf 'Error: Unexpected input: value should not contain the delimiter "%s"\n' "$delimiter" >&2
-        return 1
-    fi
 
     printf '%s<<%s\n%s\n%s\n' "$key" "$delimiter" "$converted_value" "$delimiter"
 }
