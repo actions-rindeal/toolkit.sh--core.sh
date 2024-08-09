@@ -3,6 +3,10 @@
 # Set strict mode
 #set -euo pipefail
 
+##-----------------------------------------------------------------------
+## Variables
+##-----------------------------------------------------------------------
+
 core.exportVariable() {
     local name="$1" ; shift
     local value="$1" ; shift
@@ -11,11 +15,124 @@ core.exportVariable() {
 }
 export -f  core.exportVariable
 
+core.setSecret() { echo TODO; }
+
+core.addPath() {
+    local inputPath="$1" ; shift
+    export "PATH=${inputPath}:${PATH}"
+    core.issueFileCommand 'PATH' "${inputPath}"
+}
+export -f  core.addPath
+
+core.getInput() {
+    local name  required=false  trim=true
+    
+    local opts
+    opts=$(getopt --long required,no-trim -- '' "$@") || exit 1
+    eval set -- "${opts}"
+    while (( $# > 0 )) ; do
+    case "$1" in
+        --required) required=true; shift ;;
+        --no-trim ) trim=false   ; shift ;;
+        --        ) shift; name="INPUT_${1^^}" ; shift; break ;;
+        *) printf "Invalid option: %s\n" "$1" >&2; exit 1 ;;
+    esac
+    done
+
+    if [[ ! -v "${name}" ]] ; then
+        printf "Variable '%s' does not exist.\n" "$name" >&2
+        exit 1
+    fi
+
+  local val="${!name}"
+
+  if "${required}" && [[ -z "${val}" ]] ; then
+    printf "Input required and not supplied: %s\n" "$name" >&2
+    exit 1
+  fi
+
+  "${trim}" && { printf "%s" "${val}"; } || { printf "%s" "${val//[[:space:]]/}"; }
+}
+export -f  core.getInput
+
+core.getMultilineInput() { :; }
+export -f  core.getMultilineInput
+
+core.getBooleanInput() {
+    local value
+    value="$(core.getInput "${@}")"
+    case "${value,,}" in
+        true  ) printf 'true';  return 0 ;;
+        false ) printf 'false'; return 1 ;;
+        *) printf "%s" "Input is not boolean." >&2; return 1 ;;
+    esac
+}
+export -f  core.getBooleanInput
+
+core.setOutput() {
+    local name="$1" ; shift
+    local value="$1" ; shift
+    core.issueFileCommand 'OUTPUT' "$(core.issueFileCommand "${name}" "${value}")"
+}
+export -f  core.setOutput
+
+core.setCommandEcho() { :; }
+export -f  core.setCommandEcho
+
+##-----------------------------------------------------------------------
+## Results
+##-----------------------------------------------------------------------
+
 ## Usage:
 ##     core.setFailedAndExit  "No 'repo' input provided."
 ##     core.setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
 core.setFailedAndExit() { printf "::error title=$1::${2-$1}\n" "${@:3}" ; exit 1 ; }
 export -f  core.setFailedAndExit
+
+##-----------------------------------------------------------------------
+## Logging Commands
+##-----------------------------------------------------------------------
+
+core.isDebug() { (( RUNNER_DEBUG == 1 )); }
+export -f  core.isDebug
+
+core.debug() { :; }
+export -f  core.debug
+
+core.error() { :; }
+export -f  core.error
+
+core.warning() { :; }
+export -f  core.warning
+
+core.notice() { :; }
+export -f  core.notice
+
+core.info() { :; }
+export -f  core.info
+
+core.startGroup() { :; }
+export -f  core.startGroup
+
+core.endGroup() { :; }
+export -f  core.endGroup
+
+##-----------------------------------------------------------------------
+## Wrapper action state
+##-----------------------------------------------------------------------
+
+core.saveState() { :; }
+export -f  core.saveState
+
+core.getState() { :; }
+export -f  core.getState
+
+core.getIDToken() { printf "Error: '%s' not implemented!" "${FUNCNAME}" >&2; exit 1; }
+export -f  core.getIDToken
+
+## -----------------------------------------------------------------------
+## -----------------------------------------------------------------------
+## -----------------------------------------------------------------------
 
 # Function to convert value to command value
 core.toCommandValue() {
@@ -32,13 +149,13 @@ export -f  core.toCommandValue
 
 # Function to issue a file command
 core.issueFileCommand() {
-    local command="$1"
-    local message="$2"
+    local command="$1" ; shift
+    local message="$1" ; shift
     local file_path_var="GITHUB_${command}"
     local file_path="${!file_path_var}"
 
     if [[ -z "$file_path" ]]; then
-        printf 'Error: Unable to find environment variable for file command %s\n' "$command" >&2
+        printf 'Error: Unable to find environment variable "%s"\n' "${file_path_var}" >&2
         return 1
     fi
 
