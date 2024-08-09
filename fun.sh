@@ -15,7 +15,10 @@ core.exportVariable() {
 }
 export -f  core.exportVariable
 
-core.setSecret() { echo TODO; }
+core.setSecret() {
+    local secret="$1" ; shift
+    core.issue 'add-mask' "${secret}"
+}
 
 core.addPath() {
     local inputPath="$1" ; shift
@@ -76,7 +79,12 @@ core.setOutput() {
 }
 export -f  core.setOutput
 
-core.setCommandEcho() { :; }
+core.setCommandEcho() {
+    local enabled="$1" ; shift
+    local state
+    "${enabled}" && state='on' || state='off'
+    core.issue 'echo' "${state}"
+}
 export -f  core.setCommandEcho
 
 ##-----------------------------------------------------------------------
@@ -96,25 +104,25 @@ export -f  core.setFailedAndExit
 core.isDebug() { (( RUNNER_DEBUG == 1 )); }
 export -f  core.isDebug
 
-core.debug() { :; }
+core.debug() { core.issue 'debug' "${*}"; }
 export -f  core.debug
 
-core.error() { :; }
+core.error() { core.issueCommand 'error' "${@}"; }
 export -f  core.error
 
-core.warning() { :; }
+core.warning() { core.issueCommand 'warning' "${@}"; }
 export -f  core.warning
 
-core.notice() { :; }
+core.notice() { core.issueCommand 'notice' "${@}"; }
 export -f  core.notice
 
 core.info() { printf "%s\n" "${*}"; }
 export -f  core.info
 
-core.startGroup() { :; }
+core.startGroup() { core.issue 'group' "${*}"; }
 export -f  core.startGroup
 
-core.endGroup() { :; }
+core.endGroup() { core.issue 'endgroup'; }
 export -f  core.endGroup
 
 ##-----------------------------------------------------------------------
@@ -187,10 +195,53 @@ core.prepareKeyValueMessage() {
 }
 export -f  core.prepareKeyValueMessage
 
-core._escapeData()     { printf '%s' "$1" | sed -e 's/%/%25/g' -e 's/\r/%0D/g' -e 's/\n/%0A/g'; }
-export -f  core._escapeData
-core._escapeProperty() { core._escapeData "$1" | sed -e 's/:/%3A/g' -e 's/,/%2C/g'; }
-export -f  core._escapeProperty
+core.issueCommand() {
+    local command="${1:-missing.command}" ; shift
+    local message="${1:-}" ; shift
+    local properties=( "$@" )
+
+    local cmdStr="::${command}"
+    if (( ${#properties[@]} > 0 )) ; then
+        cmdStr+=" "
+        local first=true
+        for prop in "${properties[@]}"; do
+            "$first" && first=false || cmdStr+=","
+            local key="${prop%%=*}"
+            local val="${prop#*=}"
+            cmdStr+="${key}=$(core._escapeProperty "$val")"
+        done
+    fi
+    [[ -n "${message}" ]] && cmdStr+="::$(core._escapeData "$message")" || cmdStr+="::"
+    printf '%s' "${cmdStr}"
+}
+export -f core.issueCommand
+
+core.issue() {
+    local command="$1"
+    local message="${2:-}"
+    core.issueCommand "${command}" "${message}"
+}
+export -f core.issue
+
+core._escapeData() {
+    local str="$1" ; shift
+    str="${str//%/%25}"
+    str="${str//$'\r'/%0D}"
+    str="${str//$'\n'/%0A}"
+    printf '%s' "$str"
+}
+export -f core._escapeData
+
+core._escapeProperty() {
+    local str="$1" ; shift
+    str="${str//%/%25}"
+    str="${str//$'\r'/%0D}"
+    str="${str//$'\n'/%0A}"
+    str="${str//:/%3A}"
+    str="${str//,/%2C}"
+    printf '%s' "$str"
+}
+export -f core._escapeProperty
 
 ##########  Context  ##########################
 
