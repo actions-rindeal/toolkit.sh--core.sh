@@ -392,6 +392,18 @@ core._prepareKeyValueMessage() {
 export -f  core._prepareKeyValueMessage
 
 ## @internal
+## @description
+##     NOTE: Workflow command and parameter names are case insensitive.
+## @arg $1 Command name
+## @arg $2 Message (optional)
+## @arg $@ Properties in the format `propName=propVal`
+##         Available properties:
+##         - title - Title of the annotation block
+##         - file - File path
+##         - line - Line number, starting at 1
+##         - endLine - End line number
+##         - col - Column number, starting at 1
+##         - endColumn - End column number
 core._issueCommand() {
     local command="${1:-missing.command}" ; shift
     local message="${1:-}" ; shift
