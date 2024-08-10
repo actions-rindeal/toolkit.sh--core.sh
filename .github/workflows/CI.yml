@@ -54,6 +54,7 @@ jobs:
           ls -la "${tmpdir}/trunk"
           ls -la "${trunk_path}"
           ${trunk_path} version || echo "::warning::${trunk_path} does not exist!"
+          bash -vx ${trunk_path} version || echo "::warning::${trunk_path} does not exist!"
           ls -la "${tmpdir}/trunk"
           ls -la "${trunk_path}"
         
