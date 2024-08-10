@@ -25,7 +25,7 @@ jobs:
       - if: failure()
         run: |
           set -vx
-          curl -fSL https://github.com/trunk-io/trunk-action/raw/main/setup/locate_trunk.sh | bash -vx
+          curl -fSL https://github.com/trunk-io/trunk-action/raw/main/setup/locate_trunk.sh | sed -E 's|curl\s+-fsSL|curl -fSL --verbose|' | bash -vx
           t="$(mktemp -d)"
           ls -la "${t}"
           touch "${t}/trunk"
