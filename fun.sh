@@ -37,7 +37,7 @@ export -f  core.addPath
 ## @description  Get an input value
 ## @arg  name    The name of the input to get
 ## @option  --required  Whether the input is required
-## @option  --no-trim   Whether to trim whitespace from the input
+## @option  --no-trim   Whether to trim whitespace from both ends of the input
 core.getInput() {
     local name  required=false  trim=true
     
@@ -58,14 +58,18 @@ core.getInput() {
         exit 1
     fi
 
-  local val="${!name}"
+    local val="${!name}"
 
-  if "${required}" && [[ -z "${val}" ]] ; then
-    printf "Input required and not supplied: %s\n" "$name" >&2
-    exit 1
-  fi
+    if "${required}" && [[ -z "${val}" ]] ; then
+        printf "Input required and not supplied: %s\n" "$name" >&2
+        exit 1
+    fi
 
-  "${trim}" && { printf "%s" "${val}"; } || { printf "%s" "${val//[[:space:]]/}"; }
+    if "${trim}" ; then
+        val=${val##*([[:space:]])}
+        val=${val%%*([[:space:]])}
+    fi
+    printf "%s" "${val}"
 }
 export -f  core.getInput
 
