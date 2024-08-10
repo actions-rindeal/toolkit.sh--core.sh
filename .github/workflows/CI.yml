@@ -1,0 +1,17 @@
+on:
+  push:
+    branches: [ master , ]
+  workflow_dispatch:
+
+#permissions: read-all
+
+jobs:
+  'trunk':
+    name: 'Cache Trunk'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Trunk Check
+        uses: trunk-io/trunk-action@main
