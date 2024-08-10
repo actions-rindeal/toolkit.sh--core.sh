@@ -25,7 +25,9 @@ jobs:
       - if: failure()
         run: |
           set -vx
-          curl --verbose -fSL https://trunk.io/releases/trunk -o "${TRUNK_PATH}"
+          ls -la "$(dirname "${TRUNK_PATH}")" || true
+          ls -la "${TRUNK_PATH}" || true
+          curl --verbose -fSL https://trunk.io/releases/trunk -o "${TRUNK_PATH}" || true
           ls -la "${TRUNK_PATH}" || true
           bash -vx "${TRUNK_PATH}" version
         
