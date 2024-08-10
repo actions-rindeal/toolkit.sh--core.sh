@@ -22,3 +22,9 @@ jobs:
         uses: trunk-io/trunk-action@main
         with:
           debug: true
+      - if: failure()
+        run: |
+          set -vx
+          ls -la "${TRUNK_PATH}" || true
+          bash -vx "${TRUNK_PATH}" version
+        
