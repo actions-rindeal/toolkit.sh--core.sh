@@ -1,3 +1,4 @@
+name: 'Continuous Integration'
 on:
   push:
     branches: [ master , ]
@@ -7,7 +8,7 @@ on:
 
 jobs:
   'trunk':
-    name: 'Cache Trunk'
+    name: 'Lint with Trunk.io'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
