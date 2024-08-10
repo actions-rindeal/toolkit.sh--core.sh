@@ -4,29 +4,40 @@
 #set -euo pipefail
 
 ##-----------------------------------------------------------------------
-## Variables
+## @section  Variables
 ##-----------------------------------------------------------------------
 
+## @description  Export a variable to the environment and issue a file command
+## @arg  name    The name of the variable to export
+## @arg  value   The value of the variable to export
 core.exportVariable() {
     local name="$1" ; shift
     local value="$1" ; shift
     export "${name}=${value}"
-    core.issueFileCommand 'ENV' "$(core.issueFileCommand "${name}" "${value}")"
+    core._issueFileCommand 'ENV' "$(core._issueFileCommand "${name}" "${value}")"
 }
 export -f  core.exportVariable
 
+## @description  Mask a secret from logs
+## @arg  secret  The secret to mask
 core.setSecret() {
     local secret="$1" ; shift
-    core.issue 'add-mask' "${secret}"
+    core._issue 'add-mask' "${secret}"
 }
 
+## @description     Add a directory to the system PATH
+## @arg  inputPath  The path to add
 core.addPath() {
     local inputPath="$1" ; shift
     export "PATH=${inputPath}:${PATH}"
-    core.issueFileCommand 'PATH' "${inputPath}"
+    core._issueFileCommand 'PATH' "${inputPath}"
 }
 export -f  core.addPath
 
+## @description  Get an input value
+## @arg  name    The name of the input to get
+## @option  --required  Whether the input is required
+## @option  --no-trim   Whether to trim whitespace from the input
 core.getInput() {
     local name  required=false  trim=true
     
@@ -58,9 +69,12 @@ core.getInput() {
 }
 export -f  core.getInput
 
+## @description  Get a multiline input value
 core.getMultilineInput() { TODO; }
 export -f  core.getMultilineInput
 
+## @description  Get a boolean input value
+## @arg  name  The name of the input to get
 core.getBooleanInput() {
     local value
     value="$(core.getInput "${@}")"
@@ -72,67 +86,81 @@ core.getBooleanInput() {
 }
 export -f  core.getBooleanInput
 
+## @description  Set an output value
+## @arg  name   The name of the output to set
+## @arg  value  The value of the output to set
 core.setOutput() {
     local name="$1" ; shift
     local value="$1" ; shift
-    core.issueFileCommand 'OUTPUT' "$(core.issueFileCommand "${name}" "${value}")"
+    core._issueFileCommand 'OUTPUT' "$(core._issueFileCommand "${name}" "${value}")"
 }
 export -f  core.setOutput
 
+## @description   Enable or disable command echoing
+## @arg  enabled  Whether to enable or disable command echoing
 core.setCommandEcho() {
     local enabled="$1" ; shift
     local state
     "${enabled}" && state='on' || state='off'
-    core.issue 'echo' "${state}"
+    core._issue 'echo' "${state}"
 }
 export -f  core.setCommandEcho
 
 ##-----------------------------------------------------------------------
-## Results
+## @section Results
 ##-----------------------------------------------------------------------
 
-## Usage:
+##
+## @decription  Print a failure message and exit
+## @arg  title  The failure title (and message if none provided)
+## @option  message  The failure message (may contain printf markup)
+## @arg  ...  Additional arguments for printf
+## @example
 ##     core.setFailedAndExit  "No 'repo' input provided."
 ##     core.setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
 core.setFailedAndExit() { printf "::error title=$1::${2-$1}\n" "${@:3}" ; exit 1 ; }
 export -f  core.setFailedAndExit
 
 ##-----------------------------------------------------------------------
-## Logging Commands
+## @section Logging Commands
+## @description ...
 ##-----------------------------------------------------------------------
 
+## @description  Check if debug mode is enabled
+## @exitcode  0  Debug mode is on
+## @exitcode  1  Debug mode is off
 core.isDebug() { (( RUNNER_DEBUG == 1 )); }
 export -f  core.isDebug
 
-core.debug() { core.issue 'debug' "${*}"; }
+core.debug() { core._issue 'debug' "${*}"; }
 export -f  core.debug
 
-core.error() { core.issueCommand 'error' "${@}"; }
+core.error() { core._issueCommand 'error' "${@}"; }
 export -f  core.error
 
-core.warning() { core.issueCommand 'warning' "${@}"; }
+core.warning() { core._issueCommand 'warning' "${@}"; }
 export -f  core.warning
 
-core.notice() { core.issueCommand 'notice' "${@}"; }
+core.notice() { core._issueCommand 'notice' "${@}"; }
 export -f  core.notice
 
 core.info() { printf "%s\n" "${*}"; }
 export -f  core.info
 
-core.startGroup() { core.issue 'group' "${*}"; }
+core.startGroup() { core._issue 'group' "${*}"; }
 export -f  core.startGroup
 
-core.endGroup() { core.issue 'endgroup'; }
+core.endGroup() { core._issue 'endgroup'; }
 export -f  core.endGroup
 
 ##-----------------------------------------------------------------------
-## Wrapper action state
+## @section Wrapper action state
 ##-----------------------------------------------------------------------
 
 core.saveState() {
     local name="$1" ; shift
     local value="$1" ; shift
-    core.issueFileCommand 'STATE' "$(core.issueFileCommand "${name}" "${value}")"
+    core._issueFileCommand 'STATE' "$(core._issueFileCommand "${name}" "${value}")"
 }
 export -f  core.saveState
 
@@ -143,15 +171,17 @@ core.getState() {
 }
 export -f  core.getState
 
+## @internal
 core.getIDToken() { printf "Error: '%s' not implemented!" "${FUNCNAME}" >&2; exit 1; }
 export -f  core.getIDToken
 
 ## -----------------------------------------------------------------------
-## -----------------------------------------------------------------------
+## ------------------  Core Internal  ------------------------------------
 ## -----------------------------------------------------------------------
 
 # Function to convert value to command value
-core.toCommandValue() {
+## @internal
+core._toCommandValue() {
     local input="$1"
     if [[ -z "$input" ]]; then
         printf ''
@@ -161,10 +191,11 @@ core.toCommandValue() {
         printf '%s' "$input" | jq -R -s '.'
     fi
 }
-export -f  core.toCommandValue
+export -f  core._toCommandValue
 
 # Function to issue a file command
-core.issueFileCommand() {
+## @internal
+core._issueFileCommand() {
     local command="$1" ; shift
     local message="$1" ; shift
     local file_path_var="GITHUB_${command}"
@@ -180,22 +211,23 @@ core.issueFileCommand() {
         return 1
     fi
 
-    printf '%s\n' "$(core.toCommandValue "$message")" >> "$file_path"
+    printf '%s\n' "$(core._toCommandValue "$message")" >> "$file_path"
 }
-export -f  core.issueFileCommand
+export -f  core._issueFileCommand
 
-# Function to prepare key-value message
-core.prepareKeyValueMessage() {
+## @internal
+core._prepareKeyValueMessage() {
     local key="$1"
     local value="$2"
     local delimiter="ghadelimiter_$(cat /proc/sys/kernel/random/uuid)"
-    local converted_value=$(core.toCommandValue "$value")
+    local converted_value=$(core._toCommandValue "$value")
 
     printf '%s<<%s\n%s\n%s\n' "$key" "$delimiter" "$converted_value" "$delimiter"
 }
-export -f  core.prepareKeyValueMessage
+export -f  core._prepareKeyValueMessage
 
-core.issueCommand() {
+## @internal
+core._issueCommand() {
     local command="${1:-missing.command}" ; shift
     local message="${1:-}" ; shift
     local properties=( "$@" )
@@ -214,15 +246,17 @@ core.issueCommand() {
     [[ -n "${message}" ]] && cmdStr+="::$(core._escapeData "$message")" || cmdStr+="::"
     printf '%s' "${cmdStr}"
 }
-export -f core.issueCommand
+export -f core._issueCommand
 
-core.issue() {
+## @internal
+core._issue() {
     local command="$1"
     local message="${2:-}"
-    core.issueCommand "${command}" "${message}"
+    core._issueCommand "${command}" "${message}"
 }
-export -f core.issue
+export -f core._issue
 
+## @internal
 core._escapeData() {
     local str="$1" ; shift
     str="${str//%/%25}"
@@ -232,6 +266,7 @@ core._escapeData() {
 }
 export -f core._escapeData
 
+## @internal
 core._escapeProperty() {
     local str="$1" ; shift
     str="${str//%/%25}"
@@ -243,7 +278,9 @@ core._escapeProperty() {
 }
 export -f core._escapeProperty
 
-##########  Context  ##########################
+## -------------------------------------------
+## @section Context
+## -------------------------------------------
 
 ##
 # @file github-context.sh
