@@ -444,7 +444,8 @@ core._escapeProperty() {
 export -f core._escapeProperty
 
 ## -------------------------------------------
-## @section Context
+# @section  Context
+# @see  https://github.com/actions/toolkit/blob/main/packages/github/src/context.ts
 ## -------------------------------------------
 
 ##
