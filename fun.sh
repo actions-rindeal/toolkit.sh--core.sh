@@ -164,7 +164,7 @@ export -f  core.endGroup
 core.saveState() {
     local name="$1" ; shift
     local value="$1" ; shift
-    core._issueFileCommand 'STATE' "$(core._issueFileCommand "${name}" "${value}")"
+    core._issueFileCommand 'STATE' "$(core._prepareKeyValueMessage "${name}" "${value}")"
 }
 export -f  core.saveState
 
