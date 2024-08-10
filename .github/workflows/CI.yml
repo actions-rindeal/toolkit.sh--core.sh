@@ -43,6 +43,7 @@ jobs:
               ls -la "${tmpdir}"
               ls -la "${tmpdir}/trunk"
               chmod u+x "${tmpdir}/trunk"
+              ls -la "${tmpdir}/trunk"
               trunk_path="${tmpdir}/trunk"
             fi
           fi
