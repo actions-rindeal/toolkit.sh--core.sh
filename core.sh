@@ -229,7 +229,7 @@ export -f  core.setFailedAndExit
 #         echo "Debug mode is enabled"
 #     fi
 ##
-core.isDebug() { (( RUNNER_DEBUG == 1 )); }
+core.isDebug() { (( RUNNER_DEBUG == 1 )) ; }
 export -f  core.isDebug
 
 ##
@@ -238,7 +238,7 @@ export -f  core.isDebug
 # @example
 #     core.debug "This is a debug message"
 ##
-core.debug() { core._issue 'debug' "${*}"; }
+core.debug() { core._issue 'debug' "${*}" ; }
 export -f  core.debug
 
 ##
@@ -247,7 +247,7 @@ export -f  core.debug
 # @example
 #     core.error "An error occurred"
 ##
-core.error() { core._issueCommand 'error' "${@}"; }
+core.error() { core._issueCommand 'error' "${@}" ; }
 export -f  core.error
 
 ##
@@ -256,7 +256,7 @@ export -f  core.error
 # @example
 #     core.warning "This is a warning"
 ##
-core.warning() { core._issueCommand 'warning' "${@}"; }
+core.warning() { core._issueCommand 'warning' "${@}" ; }
 export -f  core.warning
 
 ##
@@ -265,7 +265,7 @@ export -f  core.warning
 # @example
 #     core.notice "This is a notice"
 ##
-core.notice() { core._issueCommand 'notice' "${@}"; }
+core.notice() { core._issueCommand 'notice' "${@}" ; }
 export -f  core.notice
 
 ##
@@ -274,7 +274,7 @@ export -f  core.notice
 # @example
 #     core.info "This is an info message"
 ##
-core.info() { printf "%s\n" "${*}"; }
+core.info() { printf "%s\n" "${*}" ; }
 export -f  core.info
 
 ##
@@ -285,7 +285,7 @@ export -f  core.info
 #     echo "This is inside the group"
 #     core.endGroup
 ##
-core.startGroup() { core._issue 'group' "${*}"; }
+core.startGroup() { core._issue 'group' "${*}" ; }
 export -f  core.startGroup
 
 ##
@@ -295,7 +295,7 @@ export -f  core.startGroup
 #     echo "This is inside the group"
 #     core.endGroup
 ##
-core.endGroup() { core._issue 'endgroup'; }
+core.endGroup() { core._issue 'endgroup' ; }
 export -f  core.endGroup
 
 ##-----------------------------------------------------------------------
@@ -325,12 +325,12 @@ export -f  core.saveState
 core.getState() {
     local name="$1" ; shift
     local var="STATE_${name}"
-    [[ -v "${var}" ]] && { printf "%s" "${!var}"; } || { printf ""; }
+    [[ -v "${var}" ]] && { printf "%s" "${!var}" ; } || { printf "" ; }
 }
 export -f  core.getState
 
 ## @internal
-core.getIDToken() { printf "Error: '%s' not implemented!" "${FUNCNAME}" >&2; exit 1; }
+core.getIDToken() { printf "Error: '%s' not implemented!" "${FUNCNAME}" >&2; exit 1 ; }
 export -f  core.getIDToken
 
 ## -----------------------------------------------------------------------
@@ -812,91 +812,91 @@ summary.init
 # @description Get the name of the event that triggered the workflow
 # @stdout The name of the event
 ##
-context.eventName() { printf "%s" "${GITHUB_EVENT_NAME:-}"; }
+context.eventName() { printf "%s" "${GITHUB_EVENT_NAME:-}" ; }
 export -f  context.eventName
 
 ##
 # @description Get the SHA of the commit that triggered the workflow
 # @stdout The full SHA of the commit
 ##
-context.sha() { printf "%s" "${GITHUB_SHA:-}"; }
+context.sha() { printf "%s" "${GITHUB_SHA:-}" ; }
 export -f  context.sha
 
 ##
 # @description Get the reference of the commit that triggered the workflow
 # @stdout The Git ref of the commit (e.g., refs/heads/main)
 ##
-context.ref() { printf "%s" "${GITHUB_REF:-}"; }
+context.ref() { printf "%s" "${GITHUB_REF:-}" ; }
 export -f  context.ref
 
 ##
 # @description Get the name of the workflow
 # @stdout The name of the workflow
 ##
-context.workflow() { printf "%s" "${GITHUB_WORKFLOW:-}"; }
+context.workflow() { printf "%s" "${GITHUB_WORKFLOW:-}" ; }
 export -f  context.workflow
 
 ##
 # @description Get the name of the current action
 # @stdout The name of the current action
 ##
-context.action() { printf "%s" "${GITHUB_ACTION:-}"; }
+context.action() { printf "%s" "${GITHUB_ACTION:-}" ; }
 export -f  context.action
 
 ##
 # @description Get the name of the actor that triggered the workflow
 # @stdout The name of the actor (usually a GitHub username)
 ##
-context.actor() { printf "%s" "${GITHUB_ACTOR:-}"; }
+context.actor() { printf "%s" "${GITHUB_ACTOR:-}" ; }
 export -f  context.actor
 
 ##
 # @description Get the name of the current job
 # @stdout The name of the job
 ##
-context.job() { printf "%s" "${GITHUB_JOB:-}"; }
+context.job() { printf "%s" "${GITHUB_JOB:-}" ; }
 export -f  context.job
 
 ##
 # @description Get the current attempt number of the job
 # @stdout The attempt number (as a string)
 ##
-context.runAttempt() { printf "%s" "${GITHUB_RUN_ATTEMPT:-0}"; }
+context.runAttempt() { printf "%s" "${GITHUB_RUN_ATTEMPT:-0}" ; }
 export -f  context.runAttempt
 
 ##
 # @description Get the current run number of the workflow
 # @stdout The run number (as a string)
 ##
-context.runNumber() { printf "%s" "${GITHUB_RUN_NUMBER:-0}"; }
+context.runNumber() { printf "%s" "${GITHUB_RUN_NUMBER:-0}" ; }
 export -f  context.runNumber
 
 ##
 # @description Get the unique identifier for the current workflow run
 # @stdout The run ID (as a string)
 ##
-context.runId() { printf "%s" "${GITHUB_RUN_ID:-0}"; }
+context.runId() { printf "%s" "${GITHUB_RUN_ID:-0}" ; }
 export -f  context.runId
 
 ##
 # @description Get the API URL for the current GitHub instance
 # @stdout The API URL (defaults to https://api.github.com)
 ##
-context.apiUrl() { printf "%s" "${GITHUB_API_URL:-https://api.github.com}"; }
+context.apiUrl() { printf "%s" "${GITHUB_API_URL:-https://api.github.com}" ; }
 export -f  context.apiUrl
 
 ##
 # @description Get the URL for the current GitHub instance
 # @stdout The server URL (defaults to https://github.com)
 ##
-context.serverUrl() { printf "%s" "${GITHUB_SERVER_URL:-https://github.com}"; }
+context.serverUrl() { printf "%s" "${GITHUB_SERVER_URL:-https://github.com}" ; }
 export -f  context.serverUrl
 
 ##
 # @description Get the GraphQL API URL for the current GitHub instance
 # @stdout The GraphQL API URL (defaults to https://api.github.com/graphql)
 ##
-context.graphqlUrl() { printf "%s" "${GITHUB_GRAPHQL_URL:-https://api.github.com/graphql}"; }
+context.graphqlUrl() { printf "%s" "${GITHUB_GRAPHQL_URL:-https://api.github.com/graphql}" ; }
 export -f  context.graphqlUrl
 
 ##
