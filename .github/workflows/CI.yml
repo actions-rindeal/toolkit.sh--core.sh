@@ -25,6 +25,10 @@ jobs:
       - if: failure()
         run: |
           set -vx
+          t="$(mktemp -d)"
+          ls -la "${t}"
+          touch "${t}/trunk"
+          ls -la "${t}/trunk"
           ls -la "$(dirname "${TRUNK_PATH}")" || true
           ls -la "${TRUNK_PATH}" || true
           curl --verbose -fSL https://trunk.io/releases/trunk -o "${TRUNK_PATH}" || true
