@@ -7,9 +7,11 @@
 ## @section  Variables
 ##-----------------------------------------------------------------------
 
-## @description  Export a variable to the environment and issue a file command
-## @arg  name    The name of the variable to export
-## @arg  value   The value of the variable to export
+##
+# @description  Export a variable to the environment and issue a file command
+# @arg  name    The name of the variable to export
+# @arg  value   The value of the variable to export
+##
 core.exportVariable() {
     local name="$1" ; shift
     local value="$1" ; shift
@@ -18,15 +20,19 @@ core.exportVariable() {
 }
 export -f  core.exportVariable
 
-## @description  Mask a secret from logs
-## @arg  secret  The secret to mask
+##
+# @description  Mask a secret from logs
+# @arg  secret  The secret to mask
+##
 core.setSecret() {
     local secret="$1" ; shift
     core._issue 'add-mask' "${secret}"
 }
 
-## @description     Add a directory to the system PATH
-## @arg  inputPath  The path to add
+##
+# @description     Add a directory to the system PATH
+# @arg  inputPath  The path to add
+##
 core.addPath() {
     local inputPath="$1" ; shift
     export "PATH=${inputPath}:${PATH}"
@@ -34,10 +40,12 @@ core.addPath() {
 }
 export -f  core.addPath
 
-## @description  Get an input value
-## @arg  name    The name of the input to get
-## @option  --required  Whether the input is required
-## @option  --no-trim   Whether to trim whitespace from both ends of the input
+##
+# @description  Get an input value
+# @arg  name    The name of the input to get
+# @option  --required  Whether the input is required
+# @option  --no-trim   Whether to trim whitespace from both ends of the input
+##
 core.getInput() {
     local name  required=false  trim=true
     
@@ -73,12 +81,17 @@ core.getInput() {
 }
 export -f  core.getInput
 
-## @description  Get a multiline input value
+##
+# @description  Get a multiline input value
+# @arg  name  The name of the input to get
+##
 core.getMultilineInput() { TODO; }
 export -f  core.getMultilineInput
 
-## @description  Get a boolean input value
-## @arg  name  The name of the input to get
+##
+# @description  Get a boolean input value
+# @arg  name  The name of the input to get
+##
 core.getBooleanInput() {
     local value
     value="$(core.getInput "${@}")"
@@ -90,9 +103,11 @@ core.getBooleanInput() {
 }
 export -f  core.getBooleanInput
 
-## @description  Set an output value
-## @arg  name   The name of the output to set
-## @arg  value  The value of the output to set
+##
+# @description  Set an output value
+# @arg  name   The name of the output to set
+# @arg  value  The value of the output to set
+##
 core.setOutput() {
     local name="$1" ; shift
     local value="$1" ; shift
@@ -100,8 +115,10 @@ core.setOutput() {
 }
 export -f  core.setOutput
 
-## @description   Enable or disable command echoing
-## @arg  enabled  Whether to enable or disable command echoing
+##
+# @description   Enable or disable command echoing
+# @arg  enabled  Whether to enable or disable command echoing
+##
 core.setCommandEcho() {
     local enabled="$1" ; shift
     local state
@@ -115,13 +132,14 @@ export -f  core.setCommandEcho
 ##-----------------------------------------------------------------------
 
 ##
-## @decription  Print a failure message and exit
-## @arg  title  The failure title (and message if none provided)
-## @option  message  The failure message (may contain printf markup)
-## @arg  ...  Additional arguments for printf
-## @example
-##     core.setFailedAndExit  "No 'repo' input provided."
-##     core.setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
+# @decription  Print a failure message and exit
+# @arg  title  The failure title (and message if none provided)
+# @option  message  The failure message (may contain printf markup)
+# @arg  ...  Additional arguments for printf
+# @example
+#     core.setFailedAndExit  "No 'repo' input provided."
+#     core.setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
+##
 core.setFailedAndExit() { printf "::error title=$1::${2-$1}\n" "${@:3}" ; exit 1 ; }
 export -f  core.setFailedAndExit
 
@@ -130,9 +148,11 @@ export -f  core.setFailedAndExit
 ## @description ...
 ##-----------------------------------------------------------------------
 
-## @description  Check if debug mode is enabled
-## @exitcode  0  Debug mode is on
-## @exitcode  1  Debug mode is off
+##
+# @description  Check if debug mode is enabled
+# @exitcode  0  Debug mode is on
+# @exitcode  1  Debug mode is off
+##
 core.isDebug() { (( RUNNER_DEBUG == 1 )); }
 export -f  core.isDebug
 
@@ -183,7 +203,6 @@ export -f  core.getIDToken
 ## ------------------  Core Internal  ------------------------------------
 ## -----------------------------------------------------------------------
 
-# Function to convert value to command value
 ## @internal
 core._toCommandValue() {
     local input="$1"
@@ -197,7 +216,6 @@ core._toCommandValue() {
 }
 export -f  core._toCommandValue
 
-# Function to issue a file command
 ## @internal
 core._issueFileCommand() {
     local command="$1" ; shift
