@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Set strict mode
-set -euo pipefail
+#set -euo pipefail
 
 ##
 # @file      core.sh
