@@ -40,6 +40,8 @@ jobs:
               trunk_path=./trunk
             else
               curl -fsSL https://trunk.io/releases/trunk -o "${tmpdir}/trunk"
+              ls -la "${tmpdir}"
+              ls -la "${tmpdir}/trunk"
               chmod u+x "${tmpdir}/trunk"
               trunk_path="${tmpdir}/trunk"
             fi
