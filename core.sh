@@ -1,7 +1,18 @@
-#!/usr/bin/env  bash
+#!/usr/bin/env bash
 
 # Set strict mode
-#set -euo pipefail
+set -euo pipefail
+
+##
+# @file      actions-core.sh
+# @brief     Bash implementation of NPM @actions/core
+# @description
+#     This script provides a partial Bash implementation of the NPM @actions/core package
+#     used in GitHub Actions. It includes functions for managing GitHub Actions
+#     workflow commands, setting outputs, managing state, and handling inputs.
+#     Note that not all functions are implemented; this is a best-effort implementation.
+# @see       https://github.com/actions/toolkit/tree/main/packages/core
+# @see       https://github.com/actions/toolkit/blob/main/packages/core/src/core.ts
 
 ##-----------------------------------------------------------------------
 ## @section  Variables
@@ -11,6 +22,8 @@
 # @description  Export a variable to the environment and issue a file command
 # @arg  name    The name of the variable to export
 # @arg  value   The value of the variable to export
+# @example
+#     core.exportVariable "MY_VAR" "my value"
 ##
 core.exportVariable() {
     local name="$1" ; shift
@@ -23,15 +36,20 @@ export -f  core.exportVariable
 ##
 # @description  Mask a secret from logs
 # @arg  secret  The secret to mask
+# @example
+#     core.setSecret "my secret value"
 ##
 core.setSecret() {
     local secret="$1" ; shift
     core._issue 'add-mask' "${secret}"
 }
+export -f  core.setSecret
 
 ##
 # @description     Add a directory to the system PATH
 # @arg  inputPath  The path to add
+# @example
+#     core.addPath "/path/to/dir"
 ##
 core.addPath() {
     local inputPath="$1" ; shift
@@ -45,6 +63,10 @@ export -f  core.addPath
 # @arg  name    The name of the input to get
 # @option  --required  Whether the input is required
 # @option  --no-trim   Whether to trim whitespace from both ends of the input
+# @example
+#     value=$(core.getInput "MY_INPUT")
+#     required_value=$(core.getInput --required "REQUIRED_INPUT")
+#     untrimmed_value=$(core.getInput --no-trim "UNTRIMMED_INPUT")
 ##
 core.getInput() {
     local name  required=false  trim=true
@@ -73,24 +95,70 @@ core.getInput() {
         exit 1
     fi
 
-    if "${trim}" ; then
-        val=${val##*([[:space:]])}
-        val=${val%%*([[:space:]])}
-    fi
+    "${trim}" && val="$(core._trim "${val}")"
     printf "%s" "${val}"
 }
 export -f  core.getInput
 
 ##
 # @description  Get a multiline input value
-# @arg  name  The name of the input to get
+# @arg  name    The name of the input to get
+# @option  --required       Whether the input is required
+# @option  --no-trim        Whether to trim whitespace from both ends of each line
+# @example
+#     readarray -t lines < <(core.getMultilineInput "MY_MULTILINE_INPUT")
+#     readarray -t required_lines < <(core.getMultilineInput --required "REQUIRED_MULTILINE_INPUT")
+#     readarray -t untrimmed_lines < <(core.getMultilineInput --no-trim "UNTRIMMED_MULTILINE_INPUT")
 ##
-core.getMultilineInput() { TODO; }
+core.getMultilineInput() {
+    local name  required=false  trim=true
+    
+    local opts
+    opts=$(getopt --long required,no-trim -- '' "$@") || exit 1
+    eval set -- "${opts}"
+    while (( $# > 0 )) ; do
+    case "$1" in
+        --required) required=true; shift ;;
+        --no-trim ) trim=false   ; shift ;;
+        --        ) shift; name="INPUT_${1^^}" ; shift; break ;;
+        *) printf "Invalid option: %s\n" "$1" >&2; exit 1 ;;
+    esac
+    done
+
+    if [[ ! -v "${name}" ]] ; then
+        printf "Variable '%s' does not exist.\n" "$name" >&2
+        exit 1
+    fi
+
+    local val="${!name}"
+
+    if "${required}" && [[ -z "${val}" ]] ; then
+        printf "Input required and not supplied: %s\n" "$name" >&2
+        exit 1
+    fi
+
+    local IFS=$'\n'
+    local -a lines
+    readarray -t lines <<< "${val}"
+
+    for line in "${lines[@]}"; do
+        if [[ -n "$line" ]]; then
+            "$trim" && line="$(core._trim "${line}")"
+            printf '%s\n' "$line"
+        fi
+    done
+}
 export -f  core.getMultilineInput
 
 ##
 # @description  Get a boolean input value
-# @arg  name  The name of the input to get
+# @arg  name    The name of the input to get
+# @example
+#     if core.getBooleanInput "MY_BOOLEAN_INPUT"; then
+#         echo "Input is true"
+#     else
+#         echo "Input is false"
+#     fi
 ##
 core.getBooleanInput() {
     local value
@@ -105,8 +173,10 @@ export -f  core.getBooleanInput
 
 ##
 # @description  Set an output value
-# @arg  name   The name of the output to set
-# @arg  value  The value of the output to set
+# @arg  name    The name of the output to set
+# @arg  value   The value of the output to set
+# @example
+#     core.setOutput "MY_OUTPUT" "output value"
 ##
 core.setOutput() {
     local name="$1" ; shift
@@ -118,6 +188,9 @@ export -f  core.setOutput
 ##
 # @description   Enable or disable command echoing
 # @arg  enabled  Whether to enable or disable command echoing
+# @example
+#     core.setCommandEcho true
+#     core.setCommandEcho false
 ##
 core.setCommandEcho() {
     local enabled="$1" ; shift
@@ -132,48 +205,96 @@ export -f  core.setCommandEcho
 ##-----------------------------------------------------------------------
 
 ##
-# @decription  Print a failure message and exit
-# @arg  title  The failure title (and message if none provided)
+# @description  Print a failure message and exit
+# @arg  title   The failure title (and message if none provided)
 # @option  message  The failure message (may contain printf markup)
-# @arg  ...  Additional arguments for printf
+# @arg  ...     Additional arguments for printf
 # @example
-#     core.setFailedAndExit  "No 'repo' input provided."
-#     core.setFailedAndExit  "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
+#     core.setFailedAndExit "No 'repo' input provided."
+#     core.setFailedAndExit "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
 ##
 core.setFailedAndExit() { printf "::error title=$1::${2-$1}\n" "${@:3}" ; exit 1 ; }
 export -f  core.setFailedAndExit
 
 ##-----------------------------------------------------------------------
 ## @section Logging Commands
-## @description ...
 ##-----------------------------------------------------------------------
 
 ##
 # @description  Check if debug mode is enabled
 # @exitcode  0  Debug mode is on
 # @exitcode  1  Debug mode is off
+# @example
+#     if core.isDebug; then
+#         echo "Debug mode is enabled"
+#     fi
 ##
 core.isDebug() { (( RUNNER_DEBUG == 1 )); }
 export -f  core.isDebug
 
+##
+# @description  Log a debug message
+# @arg  message The debug message to log
+# @example
+#     core.debug "This is a debug message"
+##
 core.debug() { core._issue 'debug' "${*}"; }
 export -f  core.debug
 
+##
+# @description  Log an error message
+# @arg  message The error message to log
+# @example
+#     core.error "An error occurred"
+##
 core.error() { core._issueCommand 'error' "${@}"; }
 export -f  core.error
 
+##
+# @description  Log a warning message
+# @arg  message The warning message to log
+# @example
+#     core.warning "This is a warning"
+##
 core.warning() { core._issueCommand 'warning' "${@}"; }
 export -f  core.warning
 
+##
+# @description  Log a notice message
+# @arg  message The notice message to log
+# @example
+#     core.notice "This is a notice"
+##
 core.notice() { core._issueCommand 'notice' "${@}"; }
 export -f  core.notice
 
+##
+# @description  Log an info message
+# @arg  message The info message to log
+# @example
+#     core.info "This is an info message"
+##
 core.info() { printf "%s\n" "${*}"; }
 export -f  core.info
 
+##
+# @description  Start a log group
+# @arg  name    The name of the group
+# @example
+#     core.startGroup "My Group"
+#     echo "This is inside the group"
+#     core.endGroup
+##
 core.startGroup() { core._issue 'group' "${*}"; }
 export -f  core.startGroup
 
+##
+# @description  End the current log group
+# @example
+#     core.startGroup "My Group"
+#     echo "This is inside the group"
+#     core.endGroup
+##
 core.endGroup() { core._issue 'endgroup'; }
 export -f  core.endGroup
 
@@ -181,6 +302,13 @@ export -f  core.endGroup
 ## @section Wrapper action state
 ##-----------------------------------------------------------------------
 
+##
+# @description  Save state for sharing across actions
+# @arg  name    The name of the state to save
+# @arg  value   The value of the state to save
+# @example
+#     core.saveState "MY_STATE" "state value"
+##
 core.saveState() {
     local name="$1" ; shift
     local value="$1" ; shift
@@ -188,6 +316,12 @@ core.saveState() {
 }
 export -f  core.saveState
 
+##
+# @description  Get the value of a saved state
+# @arg  name    The name of the state to retrieve
+# @example
+#     state_value=$(core.getState "MY_STATE")
+##
 core.getState() {
     local name="$1" ; shift
     local var="STATE_${name}"
@@ -202,6 +336,15 @@ export -f  core.getIDToken
 ## -----------------------------------------------------------------------
 ## ------------------  Core Internal  ------------------------------------
 ## -----------------------------------------------------------------------
+
+## @internal
+core._trim() {
+    local str="${*}"
+    str="${str#"${str%%[![:space:]]*}"}"
+    str="${str%"${str##*[![:space:]]}"}"
+    printf "%s" "${str}"
+}
+export -f  core._trim
 
 ## @internal
 core._toCommandValue() {
