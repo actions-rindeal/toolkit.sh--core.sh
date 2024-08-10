@@ -11,10 +11,9 @@ plugins:
     - id: configs
       ref: main
       uri: https://github.com/trunk-io/configs
-
 # lint:
 #   ignore:
 #     - linters: [ yamllint/quoted-strings ]
-#       paths: 
+#       paths:
 #         - .github/workflows/*.yml
 #         - .github/workflows/*.yaml
