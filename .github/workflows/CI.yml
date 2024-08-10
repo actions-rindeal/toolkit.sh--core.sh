@@ -21,6 +21,6 @@ jobs:
       - name: Trunk Check
         uses: trunk-io/trunk-action@main
         with:
-          debug: true
+          debug: false
         env:
           TRUNK_LAUNCHER_QUIET: false
