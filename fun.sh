@@ -223,7 +223,7 @@ export -f  core._issueFileCommand
 core._prepareKeyValueMessage() {
     local key="$1"
     local value="$2"
-    local delimiter="ghadelimiter_$(cat /proc/sys/kernel/random/uuid)"
+    local delimiter="ghadelimiter_$(uuidgen)"
     local converted_value=$(core._toCommandValue "$value")
 
     printf '%s<<%s\n%s\n%s\n' "$key" "$delimiter" "$converted_value" "$delimiter"
