@@ -14,7 +14,7 @@ core.exportVariable() {
     local name="$1" ; shift
     local value="$1" ; shift
     export "${name}=${value}"
-    core._issueFileCommand 'ENV' "$(core._issueFileCommand "${name}" "${value}")"
+    core._issueFileCommand 'ENV' "$(core._prepareKeyValueMessage "${name}" "${value}")"
 }
 export -f  core.exportVariable
 
