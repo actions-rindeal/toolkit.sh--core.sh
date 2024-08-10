@@ -48,9 +48,12 @@ jobs:
             fi
           fi
           ls -la "${tmpdir}/trunk"
+          ls -la "${trunk_path}"
           echo "TRUNK_PATH=${trunk_path}" >>"${GITHUB_ENV}"
           # Ensure that trunk CLI is downloaded before subsequent steps
           ls -la "${tmpdir}/trunk"
+          ls -la "${trunk_path}"
           ${trunk_path} version || echo "::warning::${trunk_path} does not exist!"
           ls -la "${tmpdir}/trunk"
+          ls -la "${trunk_path}"
         
