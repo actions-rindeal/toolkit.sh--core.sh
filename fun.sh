@@ -96,7 +96,7 @@ export -f  core.getBooleanInput
 core.setOutput() {
     local name="$1" ; shift
     local value="$1" ; shift
-    core._issueFileCommand 'OUTPUT' "$(core._issueFileCommand "${name}" "${value}")"
+    core._issueFileCommand 'OUTPUT' "$(core._prepareKeyValueMessage "${name}" "${value}")"
 }
 export -f  core.setOutput
 
