@@ -959,17 +959,19 @@ export -f  context.graphqlUrl
 
 ##
 # @description Get the full event payload that triggered the workflow
+# @arg  $1  jq query, defaults to `.`
 # @stdout The event payload as a JSON string
 ##
 context.payload() {
+    local query="${1:-.}"
     local event_path="${GITHUB_EVENT_PATH:-}"
     if [[ -n "$event_path" && -f "$event_path" ]]; then
-        jq '.' "$event_path"
+        jq -r "${query}" "$event_path"
     else
         if [[ -n "$event_path" ]]; then
             core.error "${FUNCNAME}: GITHUB_EVENT_PATH does not exist" "The path '${event_path}' is unavailable."
         fi
-        echo "{}"
+        printf "{}"
     fi
 }
 export -f  context.payload
