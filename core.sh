@@ -380,6 +380,7 @@ core._getoptInvalidArgErrorAndExit() {
     printf "::error title=${FUNCNAME[1]}%3A Invalid options provided to getopt::%s\n" "${args}"
     exit 1
 }
+export -f  _getoptInvalidArgErrorAndExit
 
 ## @internal
 core._toCommandValue() {
@@ -458,7 +459,7 @@ core._issueCommand() {
     [[ -n "${message}" ]] && cmdStr+="::$(core._escapeData "$message")" || cmdStr+="::"
     printf '%s' "${cmdStr}"
 }
-export -f core._issueCommand
+export -f  core._issueCommand
 
 ## @internal
 core._issue() {
@@ -466,7 +467,7 @@ core._issue() {
     local message="${2:-}"
     core._issueCommand "${command}" "${message}"
 }
-export -f core._issue
+export -f  core._issue
 
 ## @internal
 core._escapeData() {
@@ -476,7 +477,7 @@ core._escapeData() {
     str="${str//$'\n'/%0A}"
     printf '%s' "$str"
 }
-export -f core._escapeData
+export -f  core._escapeData
 
 ## @internal
 core._escapeProperty() {
@@ -488,7 +489,7 @@ core._escapeProperty() {
     str="${str//,/%2C}"
     printf '%s' "$str"
 }
-export -f core._escapeProperty
+export -f  core._escapeProperty
 
 ##-----------------------------------------------------------------------
 # @section  Summary
@@ -508,7 +509,7 @@ summary.init() {
     __ACTIONS_CORE_SUMMARY_BUFFER_X4K92=""
     __ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92="${GITHUB_STEP_SUMMARY:-}"
 }
-export -f summary.init
+export -f  summary.init
 
 ##
 # @description  Write the summary buffer to the summary file
@@ -551,7 +552,7 @@ summary.write() {
 
     summary.emptyBuffer
 }
-export -f summary.write
+export -f  summary.write
 
 ##
 # @description  Clear the summary buffer and summary file
@@ -562,7 +563,7 @@ summary.clear() {
     __ACTIONS_CORE_SUMMARY_BUFFER_X4K92=""
     summary.write --overwrite
 }
-export -f summary.clear
+export -f  summary.clear
 
 ##
 # @description  Get the current summary buffer as a string
@@ -571,7 +572,7 @@ export -f summary.clear
 #     content=$(summary.stringify)
 ##
 summary.stringify() { printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}" ; }
-export -f summary.stringify
+export -f  summary.stringify
 
 ##
 # @description  Check if the summary buffer is empty
@@ -583,7 +584,7 @@ export -f summary.stringify
 #     fi
 ##
 summary.isEmptyBuffer() { (( ${#__ACTIONS_CORE_SUMMARY_BUFFER_X4K92} == 0 )) ; }
-export -f summary.isEmptyBuffer
+export -f  summary.isEmptyBuffer
 
 ##
 # @description  Reset the summary buffer without writing to the summary file
@@ -591,7 +592,7 @@ export -f summary.isEmptyBuffer
 #     summary.emptyBuffer
 ##
 summary.emptyBuffer() { __ACTIONS_CORE_SUMMARY_BUFFER_X4K92="" ; }
-export -f summary.emptyBuffer
+export -f  summary.emptyBuffer
 
 ##
 # @description  Add raw text to the summary buffer
@@ -602,15 +603,15 @@ export -f summary.emptyBuffer
 #     summary.addRaw "Text with EOL" --eol
 ##
 summary.addRaw() {
-    local text eol=false
+    local text="" eol=false
     
-    local opts
+    local opts=""
     opts=$(getopt -o '' -l 'eol' -- '' "$@") || exit 1
-    eval set -- "$opts"
+    eval set -- "${opts}"
     while (( $# > 0 )) ; do
-        case "$1" in
+        case "${1}" in
             --eol ) shift ; eol=true ;                       ;;
-            --    ) shift ; text="$1" ; shift 1 ;            ;;
+            --    ) shift ; text="${1}" ; shift 1 ;            ;;
             * ) core._getoptInvalidArgErrorAndExit "${@}" ;  ;;
         esac
     done
@@ -618,7 +619,7 @@ summary.addRaw() {
     __ACTIONS_CORE_SUMMARY_BUFFER_X4K92+="${text}"
     $eol && summary.addEOL
 }
-export -f summary.addRaw
+export -f  summary.addRaw
 
 ##
 # @description  Add an end-of-line character to the summary buffer
@@ -626,54 +627,66 @@ export -f summary.addRaw
 #     summary.addEOL
 ##
 summary.addEOL() { __ACTIONS_CORE_SUMMARY_BUFFER_X4K92+=$'\n' ; }
-export -f summary.addEOL
+export -f  summary.addEOL
 
 ##
 # @description  Add a code block to the summary buffer
 # @arg  code  The code to add
-# @arg  [lang]  The language for syntax highlighting
+# @option  -l | --lang | --language  The language for syntax highlighting
 # @example
-#     summary.addCodeBlock "print('Hello, World!')" "python"
+#     summary.addCodeBlock -l "python" "print('Hello, World!')"
 ##
 summary.addCodeBlock() {
-    local code="$1"
-    local lang="${2:-}"
-    local attrs=""
-    [[ -n "${lang}" ]] && attrs=" lang=\"${lang}\""
+    local code="" lang="" attrs=("")
 
-    summary.addRaw "<pre><code${attrs}>${code}</code></pre>" --eol
+    local opts=""
+    opts=$(getopt -o 'l' -l 'lang,language' -- '' "${@}") || exit 1
+    eval set -- "${opts}"
+    while (( $# > 0 )) ; do
+        case "${1}" in
+            -l | --lang | --language ) shift ; lang="${1}" ; shift 1 ;  ;;
+            --                       ) shift ; code="${1}"   ; shift 1 ;  ;;
+            * ) core._getoptInvalidArgErrorAndExit "${@}" ;  ;;
+        esac
+    done
+
+    [[ -n "${lang}" ]] && attrs+=( "lang=\"${lang}\"" )
+
+    summary.addRaw "<pre><code${attrs[*]}>${code}</code></pre>" --eol
 }
-export -f summary.addCodeBlock
+export -f  summary.addCodeBlock
 
 ##
 # @description  Add a list to the summary buffer
 # @arg  ...  List items
-# @option  --ordered  If set, create an ordered list instead of unordered
+# @option  --ul | --unordered  If set, create an unordered list. This is the default.
+# @option  --ol | --ordered    If set, create an ordered list instead of unordered
 # @example
 #     summary.addList "Item 1" "Item 2" "Item 3"
 #     summary.addList --ordered "First" "Second" "Third"
 ##
 summary.addList() {
-    local ordered=false tag='ul' items=""
-    
+    local ordered=false tag='ul' items=() itemArgs=()
+
     local opts
-    opts=$(getopt -o '' -l 'ordered' -- '' "$@") || exit 1
-    eval set -- "$opts"
+    opts=$(getopt -o '' -l 'unordered,ul,ordered,ol' -- '' "${@}") || exit 1
+    eval set -- "${opts}"
     while (( $# > 0 )) ; do
-        case "$1" in
-            --ordered ) shift ; ordered=true ; tag='ol' ;    ;;
-            --        ) shift ;                              ;;
-            * ) core._getoptInvalidArgErrorAndExit "${@}" ;  ;;
+        case "${1}" in
+            --ol | --ordered   ) shift ; ordered=true  ; tag='ol' ;           ;;
+            --ul | --unordered ) shift ; ordered=false ; tag='ul' ;           ;;
+            --                 ) shift ; itemArgs=( "${@}" ) ; shift ${#@} ;  ;;
+            * ) core._getoptInvalidArgErrorAndExit "${@}" ;                   ;;
         esac
     done
 
-    for item in "$@"; do
-        items+="<li>${item}</li>"
+    for item in "${itemArgs[@]}" ; do
+        items+=( "<li>${item}</li>" )
     done
 
-    summary.addRaw "<${tag}>${items}</${tag}>" --eol
+    summary.addRaw "<${tag}>${items[*]}</${tag}>" --eol
 }
-export -f summary.addList
+export -f  summary.addList
 
 ##
 # @description  Add a table to the summary buffer
@@ -683,9 +696,9 @@ export -f summary.addList
 ##
 summary.addTable() {
     local rows=""
-    for row in "$@"; do
+    for row in "${@}" ; do
         local cells=""
-        for cell in ${row}; do
+        for cell in ${row} ; do
             cells+="<td>${cell}</td>"
         done
         rows+="<tr>${cells}</tr>"
@@ -693,7 +706,7 @@ summary.addTable() {
 
     summary.addRaw "<table>${rows}</table>" --eol
 }
-export -f summary.addTable
+export -f  summary.addTable
 
 ##
 # @description  Add a collapsible details element to the summary buffer
@@ -703,33 +716,33 @@ export -f summary.addTable
 #     summary.addDetails "Click to expand" "Hidden content here"
 ##
 summary.addDetails() {
-    local label="$1"
-    local content="$2"
+    local label="${1}"
+    local content="${2}"
 
     summary.addRaw "<details><summary>${label}</summary>${content}</details>" --eol
 }
-export -f summary.addDetails
+export -f  summary.addDetails
 
 ##
 # @description  Add an image to the summary buffer
 # @arg  src  The path to the image
 # @arg  alt  The alt text for the image
-# @option  --width  The width of the image
-# @option  --height  The height of the image
+# @option  [-w | --width]  The width of the image
+# @option  [-h | --height]  The height of the image
 # @example
 #     summary.addImage "path/to/image.png" "Description of image" --width 100 --height 100
 ##
 summary.addImage() {
-    local src alt width height attrs
+    local src="" alt="" width="" height="" attrs=("")
     
     local opts
-    opts=$(getopt -o '' -l 'width:,height:' -- '' "$@") || exit 1
-    eval set -- "$opts"
+    opts=$(getopt -o 'w:h:' -l 'width:,height:' -- '' "${@}") || exit 1
+    eval set -- "${opts}"
     while (( $# > 0 )) ; do
-        case "$1" in
-            --width  ) shift ; width="$1"  ; shift 1 ;          ;;
-            --height ) shift ; height="$1" ; shift 1 ;          ;;
-            --       ) shift ; src="$1" ; alt="$2" ; shift 2 ;  ;;
+        case "${1}" in
+            -w | --width  ) shift ; width="${1}"  ; shift 1 ;          ;;
+            -h | --height ) shift ; height="${1}" ; shift 1 ;          ;;
+            --       ) shift ; src="${1}" ; alt="${2}" ; shift 2 ;  ;;
             * ) core._getoptInvalidArgErrorAndExit "${@}" ;     ;;
         esac
     done
@@ -738,32 +751,44 @@ summary.addImage() {
         core.error "${FUNCNAME}: missing 'src'"
         exit 1
     fi
-    attrs="src=\"${src}\""
-    [[ -n "${alt}"    ]] && attrs+=" alt=\"${alt}\""
-    [[ -n "${width}"  ]] && attrs+=" width=\"${width}\""
-    [[ -n "${height}" ]] && attrs+=" height=\"${height}\""
 
-    summary.addRaw "<img ${attrs}>" --eol
+    attrs+=( "src=\"${src}\"" )
+    [[ -n "${alt}"    ]] && attrs+=( "alt=\"${alt}\"" )
+    [[ -n "${width}"  ]] && attrs+=( "width=\"${width}\"" )
+    [[ -n "${height}" ]] && attrs+=( "height=\"${height}\"" )
+
+    summary.addRaw "<img${attrs[*]}>" --eol
 }
-export -f summary.addImage
+export -f  summary.addImage
 
 ##
 # @description  Add a heading to the summary buffer
 # @arg  text  The heading text
-# @arg  [level]  The heading level (1-6, default: 1)
+# @option  [-h | -l | --lvl | --level]  The heading level (1-6, default: 1)
 # @example
 #     summary.addHeading "Main Title"
-#     summary.addHeading "Subtitle" 2
+#     summary.addHeading -h 2 "Subtitle"
 ##
 summary.addHeading() {
-    local text="$1"
-    local level="${2:-1}"
+    local text="" level=""
+
+    local opts
+    opts=$(getopt -o 'h:l:' -l 'lvl:,level:' -- '' "${@}") || exit 1
+    eval set -- "${opts}"
+    while (( $# > 0 )) ; do
+        case "${1}" in
+            -h | -l | --lvl | --level ) shift ; level="${1}" ; shift 1 ;  ;;
+            --                        ) shift ; text="${1}"  ; shift 1 ;  ;;
+            * ) core._getoptInvalidArgErrorAndExit "${@}" ;               ;;
+        esac
+    done
 
     (( level < 1 )) && level=1
     (( level > 6 )) && level=6
+
     summary.addRaw "<h${level}>${text}</h${level}>" --eol
 }
-export -f summary.addHeading
+export -f  summary.addHeading
 
 ##
 # @description  Add a separator to the summary buffer
@@ -771,7 +796,7 @@ export -f summary.addHeading
 #     summary.addSeparator
 ##
 summary.addSeparator() { summary.addRaw "<hr>" --eol ; }
-export -f summary.addSeparator
+export -f  summary.addSeparator
 
 ##
 # @description  Add a line break to the summary buffer
@@ -779,7 +804,7 @@ export -f summary.addSeparator
 #     summary.addBreak
 ##
 summary.addBreak() { summary.addRaw "<br>" --eol ; }
-export -f summary.addBreak
+export -f  summary.addBreak
 
 ##
 # @description  Add a quote to the summary buffer
@@ -789,15 +814,15 @@ export -f summary.addBreak
 #     summary.addQuote "To be or not to be" "https://example.com/hamlet"
 ##
 summary.addQuote() {
-    local text="$1"
+    local text="${1}"
     local cite="${2:-}"
+    local attrs=("")
 
-    local attrs=""
-    [[ -n "${cite}" ]] && attrs=" cite=\"${cite}\""
+    [[ -n "${cite}" ]] && attrs+=( "cite=\"${cite}\"" )
 
-    summary.addRaw "<blockquote${attrs}>${text}</blockquote>" --eol
+    summary.addRaw "<blockquote${attrs[*]}>${text}</blockquote>" --eol
 }
-export -f summary.addQuote
+export -f  summary.addQuote
 
 ##
 # @description  Add a link to the summary buffer
@@ -807,12 +832,15 @@ export -f summary.addQuote
 #     summary.addLink "Visit our website" "https://example.com"
 ##
 summary.addLink() {
-    local text="$1"
-    local href="$2"
+    local text="${1}"
+    local href="${2}"
+    local attrs=("")
 
-    summary.addRaw "<a href=\"${href}\">${text}</a>" --eol
+    attrs+=( "href=\"${href}\"" )
+
+    summary.addRaw "<a${attrs[*]}>${text}</a>" --eol
 }
-export -f summary.addLink
+export -f  summary.addLink
 
 # Initialize the summary buffer
 summary.init
