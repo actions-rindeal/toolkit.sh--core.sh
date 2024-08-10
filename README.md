@@ -1,6 +1,8 @@
 # Bash Actions Core
 
-A Bash reimplementation of the NPM `@actions/core` package, enabling you to use the same syntax and functions in your GitHub workflows and actions written in Bash.
+A Bash reimplementation of the [`@actions/core`](https://www.npmjs.com/package/@actions/core) package.
+
+Use familiar syntax and functions in your GitHub workflows and actions now in BASH, too!
 
 ## Usage
 
