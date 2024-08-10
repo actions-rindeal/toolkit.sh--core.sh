@@ -138,9 +138,7 @@ export -f  core._getInput
 #     required_value=$(core.getInput --required "REQUIRED_INPUT")
 #     untrimmed_value=$(core.getInput --no-trim "UNTRIMMED_INPUT")
 ##
-core.getInput() {
-    core._getInput "$@" --type string
-}
+core.getInput() { core._getInput "$@" --type string ; }
 export -f core.getInput
 
 ##
@@ -153,9 +151,7 @@ export -f core.getInput
 #     readarray -t required_lines < <(core.getMultilineInput --required "REQUIRED_MULTILINE_INPUT")
 #     readarray -t untrimmed_lines < <(core.getMultilineInput --no-trim "UNTRIMMED_MULTILINE_INPUT")
 ##
-core.getMultilineInput() {
-    core._getInput "$@" --type multiline
-}
+core.getMultilineInput() { core._getInput "$@" --type multiline ; }
 export -f core.getMultilineInput
 
 ##
@@ -168,9 +164,7 @@ export -f core.getMultilineInput
 #         echo "Input is false"
 #     fi
 ##
-core.getBooleanInput() {
-    core._getInput "$@" --type boolean
-}
+core.getBooleanInput() { core._getInput "$@" --type boolean ; }
 export -f core.getBooleanInput
 
 ##
