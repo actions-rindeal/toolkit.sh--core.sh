@@ -59,6 +59,76 @@ core.addPath() {
 export -f  core.addPath
 
 ##
+# @internal
+# @description  Internal function to handle common input retrieval logic
+# @arg  name    The name of the input to get
+# @option  --required  Whether the input is required
+# @option  --no-trim   Whether to trim whitespace from both ends of the input
+# @option  --type      The type of input (string, multiline, boolean)
+# @stdout  The value of the input
+##
+core._getInput() {
+    local name required=false trim=true type="string"
+    
+    local opts
+    opts=$(getopt --long required,no-trim,type: -- '' "$@") || exit 1
+    eval set -- "${opts}"
+    while (( $# > 0 )) ; do
+    case "$1" in
+        --required) shift ; required=true ;                  ;;
+        --no-trim ) shift ; trim=false ;                     ;;
+        --type    ) shift ; type="$1" ; shift 1 ;            ;;
+        --        ) shift ; name="INPUT_${1^^}" ; shift 1 ;  ;;
+        * ) core._getoptInvalidArgErrorAndExit "${@}" ;      ;;
+    esac
+    done
+
+    if [[ ! -v "${name}" ]] ; then
+        core.error "${FUNCNAME}: Input not found." "Environment variable '${name}' does not exist."
+        return 1
+    fi
+
+    local value="${!name}"
+
+    if "${required}" && [[ -z "${value}" ]] ; then
+        core.error "${FUNCNAME}: Required input is empty." "Input '${name}' was found empty, but its value was required to be non-empty."
+        return 1
+    fi
+
+    case "${type}" in
+        string )
+            "${trim}" && value="$(core._trim "${value}")"
+            printf "%s" "${value}"
+            ;;
+        multiline )
+            local IFS=$'\n'
+            local -a lines
+            readarray -t lines <<< "${value}"
+            for line in "${lines[@]}"; do
+                if [[ -n "$line" ]]; then
+                    "$trim" && line="$(core._trim "${line}")"
+                    printf '%s\n' "$line"
+                fi
+            done
+            ;;
+        boolean )
+            value="$(core._trim "${value}")"
+            value="${value,,}"
+            case "${value}" in
+                true  ) return 0 ;;
+                false ) return 1 ;;
+                *) core.error "Input '${name}' is not boolean." "The actual value is '${value}'" ; return 2 ;;
+            esac
+            ;;
+        * )
+            core.error "${FUNCNAME}: Invalid input type '${type}'"
+            exit 1
+            ;;
+    esac
+}
+export -f  core._getInput
+
+##
 # @description  Get an input value
 # @arg  name    The name of the input to get
 # @option  --required  Whether the input is required
@@ -69,36 +139,9 @@ export -f  core.addPath
 #     untrimmed_value=$(core.getInput --no-trim "UNTRIMMED_INPUT")
 ##
 core.getInput() {
-    local name  required=false  trim=true
-    
-    local opts
-    opts=$(getopt --long required,no-trim -- '' "$@") || exit 1
-    eval set -- "${opts}"
-    while (( $# > 0 )) ; do
-    case "$1" in
-        --required) shift ; required=true ;                  ;;
-        --no-trim ) shift ; trim=false ;                     ;;
-        --        ) shift ; name="INPUT_${1^^}" ; shift 1 ;  ;;
-        * ) core._getoptInvalidArgErrorAndExit "${@}" ;      ;;
-    esac
-    done
-
-    if [[ ! -v "${name}" ]] ; then
-        core.error "${FUNCNAME}: Input not found." "Environment variable '${name}' does not exist."
-        exit 1
-    fi
-
-    local value="${!name}"
-
-    if "${required}" && [[ -z "${value}" ]] ; then
-        core.error "${FUNCNAME}: Required input is empty." "Input '${name}' was found empty, but it's value was required to be non-empty."
-        exit 1
-    fi
-
-    "${trim}" && value="$(core._trim "${value}")"
-    printf "%s" "${value}"
+    core._getInput "$@" --type string
 }
-export -f  core.getInput
+export -f core.getInput
 
 ##
 # @description  Get a multiline input value
@@ -111,44 +154,9 @@ export -f  core.getInput
 #     readarray -t untrimmed_lines < <(core.getMultilineInput --no-trim "UNTRIMMED_MULTILINE_INPUT")
 ##
 core.getMultilineInput() {
-    local name  required=false  trim=true
-    
-    local opts
-    opts=$(getopt --long required,no-trim -- '' "$@") || exit 1
-    eval set -- "${opts}"
-    while (( $# > 0 )) ; do
-    case "$1" in
-        --required) shift ; required=true ;                  ;;
-        --no-trim ) shift ; trim=false ;                     ;;
-        --        ) shift ; name="INPUT_${1^^}" ; shift 1 ;  ;;
-        * ) core._getoptInvalidArgErrorAndExit "${@}" ;      ;;
-    esac
-    done
-
-    if [[ ! -v "${name}" ]] ; then
-        core.error "${FUNCNAME}: Input not found." "Environment variable '${name}' does not exist."
-        exit 1
-    fi
-
-    local value="${!name}"
-
-    if "${required}" && [[ -z "${value}" ]] ; then
-        core.error "${FUNCNAME}: Required input is empty." "Input '${name}' was found empty, but it's value was required to be non-empty."
-        exit 1
-    fi
-
-    local IFS=$'\n'
-    local -a lines
-    readarray -t lines <<< "${value}"
-
-    for line in "${lines[@]}"; do
-        if [[ -n "$line" ]]; then
-            "$trim" && line="$(core._trim "${line}")"
-            printf '%s\n' "$line"
-        fi
-    done
+    core._getInput "$@" --type multiline
 }
-export -f  core.getMultilineInput
+export -f core.getMultilineInput
 
 ##
 # @description  Get a boolean input value
@@ -161,42 +169,9 @@ export -f  core.getMultilineInput
 #     fi
 ##
 core.getBooleanInput() {
-    local name  required=false  trim=true
-    
-    local opts
-    opts=$(getopt --long required,no-trim -- '' "$@") || exit 1
-    eval set -- "${opts}"
-    while (( $# > 0 )) ; do
-    case "$1" in
-        --required) shift ; required=true ;                  ;;
-        --no-trim ) shift ; trim=false ;                     ;;
-        --        ) shift ; name="INPUT_${1^^}" ; shift 1 ;  ;;
-        * ) core._getoptInvalidArgErrorAndExit "${@}" ;      ;;
-    esac
-    done
-
-    if [[ ! -v "${name}" ]] ; then
-        core.error "${FUNCNAME}: Input not found." "Environment variable '${name}' does not exist."
-        exit 1
-    fi
-
-    local value="${!name}"
-
-    if "${required}" && [[ -z "${value}" ]] ; then
-        core.error "${FUNCNAME}: Required input is empty." "Input '${name}' was found empty, but it's value was required to be non-empty."
-        exit 1
-    fi
-
-    value="$(core._trim "${val}")"
-    value="${value,,}"
-
-    case "${value}" in
-        true  ) return 0 ;;
-        false ) return 1 ;;
-        *) core.error "Input '${1}' is not boolean." "The actual value is '${value}'" ; return 2 ;;
-    esac
+    core._getInput "$@" --type boolean
 }
-export -f  core.getBooleanInput
+export -f core.getBooleanInput
 
 ##
 # @description  Set an output value
