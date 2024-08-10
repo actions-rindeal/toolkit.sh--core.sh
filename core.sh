@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ##
-# @file      actions-core.sh
+# @file      core.sh
 # @brief     Bash implementation of NPM @actions/core
 # @description
 #     This script provides a partial Bash implementation of the NPM @actions/core package
