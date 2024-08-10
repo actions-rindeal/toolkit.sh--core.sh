@@ -24,7 +24,7 @@ core.setOutput "MY_OUTPUT" "output value"
 core.isDebug && echo "Debug mode on" || echo "Debug mode off"
 core.debug    "This is a debug message"
 core.error    "An error occurred"
-core.warning  "This is a warning"
+core.warning  "This is a warning" line=235
 core.notice   "This is a notice"
 core.info     "This is an info message"
 
