@@ -543,9 +543,7 @@ export -f summary.clear
 # @example
 #     content=$(summary.stringify)
 ##
-summary.stringify() {
-    printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}"
-}
+summary.stringify() { printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}" ; }
 export -f summary.stringify
 
 ##
@@ -600,9 +598,7 @@ export -f summary.addRaw
 # @example
 #     summary.addEOL
 ##
-summary.addEOL() {
-    __ACTIONS_CORE_SUMMARY_BUFFER_X4K92+=$'\n'
-}
+summary.addEOL() { __ACTIONS_CORE_SUMMARY_BUFFER_X4K92+=$'\n' ; }
 export -f summary.addEOL
 
 ##
