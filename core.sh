@@ -357,7 +357,7 @@ core.getState() {
 export -f  core.getState
 
 ## @internal
-core.getIDToken() { printf "Error: '%s' not implemented!" "${FUNCNAME}" >&2; exit 1 ; }
+core.getIDToken() { core._NotImplementedErrorAndExit ; }
 export -f  core.getIDToken
 
 ## -----------------------------------------------------------------------
@@ -378,6 +378,13 @@ core._getoptInvalidArgErrorAndExit() {
     local args
     args="$(printf "'%s' " "${@}")"
     printf "::error title=${FUNCNAME[1]}%3A Invalid options provided to getopt::%s\n" "${args}"
+    exit 1
+}
+export -f  _getoptInvalidArgErrorAndExit
+
+## @internal
+core._NotImplementedErrorAndExit() {
+    printf "::error title=%s() is not implemented::\n" "${FUNCNAME[1]}"
     exit 1
 }
 export -f  _getoptInvalidArgErrorAndExit
@@ -688,25 +695,56 @@ summary.addList() {
 }
 export -f  summary.addList
 
-##
-# @description  Add a table to the summary buffer
-# @arg  ...  Table rows, where each row is a space-separated list of cells
-# @example
-#     summary.addTable "Header1 Header2" "Value1 Value2" "Value3 Value4"
-##
-summary.addTable() {
-    local rows=""
-    for row in "${@}" ; do
-        local cells=""
-        for cell in ${row} ; do
-            cells+="<td>${cell}</td>"
-        done
-        rows+="<tr>${cells}</tr>"
-    done
-
-    summary.addRaw "<table>${rows}</table>" --eol
-}
+## @internal
+summary.addTable() { core._NotImplementedErrorAndExit ; }
 export -f  summary.addTable
+
+##
+# @description  Start a table in the summary buffer and optionally add a header row
+# @arg  ...  Optional header cells
+# @example
+#     summary.startTable "Header1" "Header2" "Header3"
+##
+summary.startTable() {
+    summary.addRaw "<table>" --eol
+    local cells=""
+    for cell in "${@}" ; do
+        cells+="<th>${cell}</th>"
+    done
+    [[ -n "${cells}" ]] && \
+        summary.addRaw "<thead><tr>${cells}</tr></thead>" --eol
+    summary.addRaw "<tbody>" --eol
+}
+export -f summary.startTable
+
+##
+# @description  Add a row to the table in the summary buffer
+# @arg  ...  Table cells for the row
+# @example
+#     summary.addTableRow "Value1" "Value2" "Value3"
+##
+summary.addTableRow() {
+    local row_cells=""
+    if (( $# <= 0 )) ; then
+        core.error "${FUNCNAME}: No cells provided" "Function called with no arguments."
+        exit 1
+    fi
+    for cell in "${@}" ; do
+        row_cells+="<td>${cell}</td>"
+    done
+    summary.addRaw "<tr>${row_cells}</tr>" --eol
+}
+export -f summary.addTableRow
+
+##
+# @description  End the table in the summary buffer
+# @example
+#     summary.endTable
+##
+summary.endTable() {
+    summary.addRaw "</tbody></table>" --eol
+}
+export -f summary.endTable
 
 ##
 # @description  Add a collapsible details element to the summary buffer
@@ -960,7 +998,7 @@ context.payload() {
         jq '.' "$event_path"
     else
         if [[ -n "$event_path" ]]; then
-            printf "GITHUB_EVENT_PATH %s does not exist" "$event_path" >&2
+            core.error "${FUNCNAME}: GITHUB_EVENT_PATH does not exist" "The path '${event_path}' is unavailable."
         fi
         echo "{}"
     fi
@@ -981,7 +1019,7 @@ context.repo() {
     fi
 
     if [[ -z "$repo_info" ]]; then
-        printf "Error: Unable to determine repository information. Ensure GITHUB_REPOSITORY is set or the payload contains repository data." >&2
+        core.error "${FUNCNAME}: Unable to determine repository information" "Ensure GITHUB_REPOSITORY is set or the payload contains repository data."
         return 1
     fi
 
