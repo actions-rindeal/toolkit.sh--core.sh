@@ -5,7 +5,7 @@ cli:
 
 plugins:
   sources:
-    # required for check to run
+    # 'trunk' plugin is mandatory as it contains all the linters and checks
     - id: trunk
       ref: main
       uri: https://github.com/trunk-io/plugins
