@@ -76,24 +76,6 @@ lint:
     - trunk-toolbox@0.3.2
     - yamllint@1.35.1
 
-  # Sourcing repos will have these configs available to applicable linters
-  exported_configs:
-    - configs:
-        - configs/.flake8
-        - configs/.hadolint.yaml
-        - configs/.isort.cfg
-        - configs/.markdownlint.yaml
-        - configs/.prettierrc.yaml
-        - configs/.pylintrc
-        - configs/.remarkrc.yaml
-        - configs/ruff.toml
-        - configs/rustfmt.toml
-        - configs/.shellcheckrc
-        - configs/.sqlfluff
-        - configs/.stylelintrc.js
-        - configs/svgo.config.js
-        - configs/.yamllint.yaml
-
 # By sourcing this plugin, repos will enable these actions
 actions:
   enabled:
