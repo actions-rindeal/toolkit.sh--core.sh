@@ -3,14 +3,14 @@ version: 0.1
 cli:
   version: 1.22.2
 
-plugins:
-  sources:
-    - id: trunk
-      ref: main
-      uri: https://github.com/trunk-io/plugins
-    - id: configs
-      ref: main
-      uri: https://github.com/trunk-io/configs
+# plugins:
+#   sources:
+#     - id: trunk
+#       ref: main
+#       uri: https://github.com/trunk-io/plugins
+#     - id: configs
+#       ref: main
+#       uri: https://github.com/trunk-io/configs
 
 lint:
   ignore:
