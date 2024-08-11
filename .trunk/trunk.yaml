@@ -14,10 +14,10 @@ plugins:
 
 lint:
   ignore:
-    - linters: [ yamllint/quoted-strings ]
-      paths:
-        - .github/workflows/*.yml
-        - .github/workflows/*.yaml
+    # - linters: [ yamllint/quoted-strings ]
+    #   paths:
+    #     - .github/workflows/*.yml
+    #     - .github/workflows/*.yaml
     - linters: [ shfmt ]
       paths:
         - "**/*"
