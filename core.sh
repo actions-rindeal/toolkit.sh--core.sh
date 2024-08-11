@@ -26,8 +26,8 @@
 #     core.exportVariable "MY_VAR" "my value"
 ##
 core.exportVariable() {
-    local name="$1" ; shift
-    local value="$1" ; shift
+    local name="${1}" ; shift
+    local value="${1}" ; shift
     export "${name}=${value}"
     core._issueFileCommand 'ENV' "$(core._prepareKeyValueMessage "${name}" "${value}")"
 }
@@ -40,8 +40,8 @@ export -f  core.exportVariable
 #     core.setSecret "my secret value"
 ##
 core.setSecret() {
-    local secret="$1" ; shift
-    core._issue 'add-mask' "${secret}"
+    local secret="${1}" ; shift
+    core._issueCommand 'add-mask' "${secret}"
 }
 export -f  core.setSecret
 
@@ -52,7 +52,7 @@ export -f  core.setSecret
 #     core.addPath "/path/to/dir"
 ##
 core.addPath() {
-    local inputPath="$1" ; shift
+    local inputPath="${1}" ; shift
     export "PATH=${inputPath}:${PATH}"
     core._issueFileCommand 'PATH' "${inputPath}"
 }
@@ -74,10 +74,10 @@ core._getInput() {
     opts=$(getopt --long required,no-trim,type: -- '' "$@") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
-    case "$1" in
+    case "${1}" in
         --required) shift ; required=true ;                  ;;
         --no-trim ) shift ; trim=false ;                     ;;
-        --type    ) shift ; type="$1" ; shift 1 ;            ;;
+        --type    ) shift ; type="${1}" ; shift 1 ;            ;;
         --        ) shift ; name="INPUT_${1^^}" ; shift 1 ;  ;;
         * ) core._getoptInvalidArgErrorAndExit "${@}" ;      ;;
     esac
@@ -105,9 +105,9 @@ core._getInput() {
             local -a lines
             readarray -t lines <<< "${value}"
             for line in "${lines[@]}"; do
-                if [[ -n "$line" ]]; then
-                    "$trim" && line="$(core._trim "${line}")"
-                    printf '%s\n' "$line"
+                if [[ -n "${line}" ]]; then
+                    "${trim}" && line="$(core._trim "${line}")"
+                    printf '%s\n' "${line}"
                 fi
             done
             ;;
@@ -175,8 +175,8 @@ export -f core.getBooleanInput
 #     core.setOutput "MY_OUTPUT" "output value"
 ##
 core.setOutput() {
-    local name="$1" ; shift
-    local value="$1" ; shift
+    local name="${1}" ; shift
+    local value="${1}" ; shift
     core._issueFileCommand 'OUTPUT' "$(core._prepareKeyValueMessage "${name}" "${value}")"
 }
 export -f  core.setOutput
@@ -189,10 +189,10 @@ export -f  core.setOutput
 #     core.setCommandEcho false
 ##
 core.setCommandEcho() {
-    local enabled="$1" ; shift
+    local enabled="${1}" ; shift
     local state
     "${enabled}" && state='on' || state='off'
-    core._issue 'echo' "${state}"
+    core._issueCommand 'echo' "${state}"
 }
 export -f  core.setCommandEcho
 
@@ -234,7 +234,7 @@ export -f  core.isDebug
 # @example
 #     core.debug "This is a debug message"
 ##
-core.debug() { core._issue 'debug' "${*}" ; }
+core.debug() { core._issueCommand 'debug' "${*}" ; }
 export -f  core.debug
 
 ##
@@ -281,7 +281,7 @@ export -f  core.info
 #     echo "This is inside the group"
 #     core.endGroup
 ##
-core.startGroup() { core._issue 'group' "${*}" ; }
+core.startGroup() { core._issueCommand 'group' "${*}" ; }
 export -f  core.startGroup
 
 ##
@@ -291,7 +291,7 @@ export -f  core.startGroup
 #     echo "This is inside the group"
 #     core.endGroup
 ##
-core.endGroup() { core._issue 'endgroup' ; }
+core.endGroup() { core._issueCommand 'endgroup' ; }
 export -f  core.endGroup
 
 ##-----------------------------------------------------------------------
@@ -306,8 +306,8 @@ export -f  core.endGroup
 #     core.saveState "MY_STATE" "state value"
 ##
 core.saveState() {
-    local name="$1" ; shift
-    local value="$1" ; shift
+    local name="${1}" ; shift
+    local value="${1}" ; shift
     core._issueFileCommand 'STATE' "$(core._prepareKeyValueMessage "${name}" "${value}")"
 }
 export -f  core.saveState
@@ -319,7 +319,7 @@ export -f  core.saveState
 #     state_value=$(core.getState "MY_STATE")
 ##
 core.getState() {
-    local name="$1" ; shift
+    local name="${1}" ; shift
     local var="STATE_${name}"
     [[ -v "${var}" ]] && { printf "%s" "${!var}" ; } || { printf "" ; }
 }
@@ -330,7 +330,7 @@ core.getIDToken() { core._NotImplementedErrorAndExit ; }
 export -f  core.getIDToken
 
 ## -----------------------------------------------------------------------
-## ------------------  Core Internal  ------------------------------------
+## @section  Core Internal
 ## -----------------------------------------------------------------------
 
 ## @internal
@@ -359,49 +359,102 @@ core._NotImplementedErrorAndExit() {
 export -f  _getoptInvalidArgErrorAndExit
 
 ## @internal
+core._prepareKeyValueMessage() {
+    local key="${1}"
+    local value="${2}"
+    local delimiter="ghadelimiter_$(uuidgen)"
+    local converted_value=$(core._toCommandValue "${value}")
+
+    printf '%s<<%s\n%s\n%s\n' "${key}" "${delimiter}" "${converted_value}" "${delimiter}"
+}
+export -f  core._prepareKeyValueMessage
+
+## @internal
 core._toCommandValue() {
-    local input="$1"
-    if [[ -z "$input" ]]; then
+    local input="${1}"
+    if [[ -z "${input}" ]]; then
         printf ''
-    elif [[ "$input" == true || "$input" == false || "$input" =~ ^[0-9]+$ ]]; then
-        printf '%s' "$input"
+    elif [[ "${input}" == true || "${input}" == false || "${input}" =~ ^[0-9]+$ ]]; then
+        printf '%s' "${input}"
     else
-        printf '%s' "$input" | jq -R -s '.'
+        printf '%s' "${input}" | jq -R -s '.'
     fi
 }
 export -f  core._toCommandValue
 
 ## @internal
 core._issueFileCommand() {
-    local command="$1" ; shift
-    local message="$1" ; shift
+    local command="${1}" ; shift
+    local message="${1}" ; shift
     local file_path_var="GITHUB_${command}"
     local file_path="${!file_path_var}"
 
-    if [[ -z "$file_path" ]]; then
+    if [[ -z "${file_path}" ]]; then
         printf 'Error: Unable to find environment variable "%s"\n' "${file_path_var}" >&2
         return 1
     fi
 
-    if [[ ! -f "$file_path" ]]; then
-        printf 'Error: Missing file at path: %s\n' "$file_path" >&2
+    if [[ ! -f "${file_path}" ]]; then
+        printf 'Error: Missing file at path: %s\n' "${file_path}" >&2
         return 1
     fi
 
-    printf '%s\n' "$(core._toCommandValue "$message")" >> "$file_path"
+    printf '%s\n' "$(core._toCommandValue "${message}")" >> "${file_path}"
 }
 export -f  core._issueFileCommand
 
 ## @internal
-core._prepareKeyValueMessage() {
-    local key="$1"
-    local value="$2"
-    local delimiter="ghadelimiter_$(uuidgen)"
-    local converted_value=$(core._toCommandValue "$value")
-
-    printf '%s<<%s\n%s\n%s\n' "$key" "$delimiter" "$converted_value" "$delimiter"
+core._escapeData() {
+    local str="${1}" ; shift
+    str="${str//%/%25}"
+    str="${str//$'\r'/%0D}"
+    str="${str//$'\n'/%0A}"
+    printf '%s' "${str}"
 }
-export -f  core._prepareKeyValueMessage
+export -f  core._escapeData
+
+## @internal
+core._escapeProperty() {
+    local str="${1}" ; shift
+    str="${str//%/%25}"
+    str="${str//$'\r'/%0D}"
+    str="${str//$'\n'/%0A}"
+    str="${str//:/%3A}"
+    str="${str//,/%2C}"
+    printf '%s' "${str}"
+}
+export -f  core._escapeProperty
+
+## @internal
+## @description
+##     NOTE: Workflow command and parameter names are case insensitive.
+## @arg $1 Command name
+## @arg $2 Message (optional)
+## @arg $@ Properties in the format `propName=propVal`
+core._issueCommand() {
+    local command="${1:-missing.command}" ; shift
+    local message="${1:-}" ; shift
+    local properties=( "$@" )
+
+    local cmdStr="::${command}"
+
+    if (( ${#properties[@]} > 0 )) ; then
+        cmdStr+=" "
+        local prop first=true
+        for prop in "${properties[@]}" ; do
+            "${first}" && first=false || cmdStr+=","
+            local key="${prop%%=*}"
+            local val="${prop#*=}"
+            cmdStr+="${key}=$(core._escapeProperty "${val}")"
+        done
+    fi
+
+    cmdStr+="::"
+    [[ -n "${message}" ]] && cmdStr+="$(core._escapeData "${message}")"
+
+    printf '%s' "${cmdStr}"
+}
+export -f  core._issueCommand
 
 ## @internal
 ## @description
@@ -412,60 +465,34 @@ export -f  core._prepareKeyValueMessage
 ##         Available properties:
 ##         - title - Title of the annotation block
 ##         - file - File path
-##         - line - Line number, starting at 1
+##         - line | startLine - Line number, starting at 1
 ##         - endLine - End line number
-##         - col - Column number, starting at 1
+##         - col | startColumn - Column number, starting at 1
 ##         - endColumn - End column number
-core._issueCommand() {
-    local command="${1:-missing.command}" ; shift
-    local message="${1:-}" ; shift
-    local properties=( "$@" )
+core._issueLoggingCommand() {
+    local command="${1}"        ; shift
+    local message="${2}"        ; shift
+    local properties=( "${@}" ) ; shift ${#@}
+    
+    local prop
+    for prop in "${properties[@]}" ; do
+        local key="${prop%%=*}"
+        local value="${prop#*=}"
+        case "${key}" in
+            line | startLine  )  props+=( "line=${value}" )  ;;
+            col | startColumn )  props+=( "col=${value}"  )  ;;
+            title | file | endLine | endColumn ) props+=( "${key}=${value}" )  ;;
+            * )
+                printf "::error title=%s()%3A Invalid property '%s'::The property '%s' is not a valid logging annotation property.\n" \
+                    "${FUNCNAME[1]}" "${key}" "${key}"
+                exit 1
+            ;;
+        esac
+    done
 
-    local cmdStr="::${command}"
-    if (( ${#properties[@]} > 0 )) ; then
-        cmdStr+=" "
-        local first=true
-        for prop in "${properties[@]}"; do
-            "$first" && first=false || cmdStr+=","
-            local key="${prop%%=*}"
-            local val="${prop#*=}"
-            cmdStr+="${key}=$(core._escapeProperty "$val")"
-        done
-    fi
-    [[ -n "${message}" ]] && cmdStr+="::$(core._escapeData "$message")" || cmdStr+="::"
-    printf '%s' "${cmdStr}"
+    core._issueCommand "${command}" "${message}" "${props[@]}"
 }
-export -f  core._issueCommand
-
-## @internal
-core._issue() {
-    local command="$1"
-    local message="${2:-}"
-    core._issueCommand "${command}" "${message}"
-}
-export -f  core._issue
-
-## @internal
-core._escapeData() {
-    local str="$1" ; shift
-    str="${str//%/%25}"
-    str="${str//$'\r'/%0D}"
-    str="${str//$'\n'/%0A}"
-    printf '%s' "$str"
-}
-export -f  core._escapeData
-
-## @internal
-core._escapeProperty() {
-    local str="$1" ; shift
-    str="${str//%/%25}"
-    str="${str//$'\r'/%0D}"
-    str="${str//$'\n'/%0A}"
-    str="${str//:/%3A}"
-    str="${str//,/%2C}"
-    printf '%s' "$str"
-}
-export -f  core._escapeProperty
+export -f  core._issueLoggingCommand
 
 ##-----------------------------------------------------------------------
 # @section  Summary
@@ -474,18 +501,6 @@ export -f  core._escapeProperty
 
 # Global variables with unique names
 __ACTIONS_CORE_SUMMARY_BUFFER_X4K92=""
-__ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92=""
-
-##
-# @description  Initialize the summary buffer
-# @example
-#     summary.init
-##
-summary.init() {
-    __ACTIONS_CORE_SUMMARY_BUFFER_X4K92=""
-    __ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92="${GITHUB_STEP_SUMMARY:-}"
-}
-export -f  summary.init
 
 ##
 # @description  Write the summary buffer to the summary file
@@ -499,31 +514,31 @@ summary.write() {
     
     local opts
     opts=$(getopt -o '' -l 'overwrite' -- '' "$@") || exit 1
-    eval set -- "$opts"
+    eval set -- "${opts}"
     while (( $# > 0 )) ; do
-        case "$1" in
+        case "${1}" in
             --overwrite ) shift ; overwrite=true ;           ;;
             --          ) shift ;                            ;;
             * ) core._getoptInvalidArgErrorAndExit "${@}" ;  ;;
         esac
     done
 
-    if [[ -z "${__ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92}" ]] ; then
+    if [[ ! -v GITHUB_STEP_SUMMARY ]] || [[ -z "${GITHUB_STEP_SUMMARY}" ]] ; then
         core.error "Environment Variable Not Found" \
             "Unable to find environment variable for GITHUB_STEP_SUMMARY. Check if your runtime environment supports job summaries."
         exit 1
     fi
 
-    if [[ ! -w "${__ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92}" ]] ; then
+    if [[ ! -w "${GITHUB_STEP_SUMMARY}" ]] ; then
         core.error "Summary File Access Denied" \
-            "Unable to access summary file: '${__ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92}'. Check if the file has correct read/write permissions."
+            "Unable to access summary file: '${GITHUB_STEP_SUMMARY}'. Check if the file has correct read/write permissions."
         exit 1
     fi
 
-    if $overwrite ; then
-        printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}" > "${__ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92}"
+    if "${overwrite}" ; then
+        printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}" > "${GITHUB_STEP_SUMMARY}"
     else
-        printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}" >> "${__ACTIONS_CORE_SUMMARY_FILE_PATH_X4K92}"
+        printf "%s" "${__ACTIONS_CORE_SUMMARY_BUFFER_X4K92}" >> "${GITHUB_STEP_SUMMARY}"
     fi
 
     summary.emptyBuffer
@@ -849,9 +864,6 @@ summary.addLink() {
 }
 export -f  summary.addLink
 
-# Initialize the summary buffer
-summary.init
-
 ## -------------------------------------------
 # @section  Context
 # @see  https://github.com/actions/toolkit/blob/main/packages/github/src/context.ts
@@ -965,10 +977,10 @@ export -f  context.graphqlUrl
 context.payload() {
     local query="${1:-.}"
     local event_path="${GITHUB_EVENT_PATH:-}"
-    if [[ -n "$event_path" && -f "$event_path" ]]; then
-        jq -r "${query}" "$event_path"
+    if [[ -n "${event_path}" && -f "${event_path}" ]]; then
+        jq -r "${query}" "${event_path}"
     else
-        if [[ -n "$event_path" ]]; then
+        if [[ -n "${event_path}" ]]; then
             core.error "${FUNCNAME}: GITHUB_EVENT_PATH does not exist" "The path '${event_path}' is unavailable."
         fi
         printf "{}"
@@ -984,17 +996,17 @@ export -f  context.payload
 context.repo() {
     local repo_info=""
     if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
-        repo_info=$(awk -F'/' '{printf "%s %s", $1, $2}' <<< "$GITHUB_REPOSITORY")
+        repo_info=$(awk -F'/' '{printf "%s %s", $1, $2}' <<< "${GITHUB_REPOSITORY}")
     else
         repo_info=$(context.payload | jq -r '(.repository.owner.login + " " + .repository.name) // empty')
     fi
 
-    if [[ -z "$repo_info" ]]; then
+    if [[ -z "${repo_info}" ]]; then
         core.error "${FUNCNAME}: Unable to determine repository information" "Ensure GITHUB_REPOSITORY is set or the payload contains repository data."
         return 1
     fi
 
-    printf "%s" "$repo_info"
+    printf "%s" "${repo_info}"
 }
 export -f  context.repo
 
@@ -1005,6 +1017,6 @@ export -f  context.repo
 context.issue() {
     read -r owner repo <<< "$(context.repo)"
     number=$(context.payload | jq -r '(.issue.number // .pull_request.number // .number) // empty')
-    printf "%s %s %s" "$owner" "$repo" "$number"
+    printf "%s %s %s" "${owner}" "${repo}" "${number}"
 }
 export -f  context.issue
