@@ -346,7 +346,7 @@ export -f  core._trim
 core._getoptInvalidArgErrorAndExit() {
     local args
     args="$(printf "'%s' " "${@}")"
-    printf "::error title=${FUNCNAME[1]}%3A Invalid options provided to getopt::%s\n" "${args}"
+    printf "::error title=%s%%3A Invalid options provided to getopt::%s\n" "${FUNCNAME[1]}" "${args}"
     exit 1
 }
 export -f  _getoptInvalidArgErrorAndExit
@@ -362,8 +362,10 @@ export -f  _getoptInvalidArgErrorAndExit
 core._prepareKeyValueMessage() {
     local key="${1}"
     local value="${2}"
-    local delimiter="ghadelimiter_$(uuidgen)"
-    local converted_value=$(core._toCommandValue "${value}")
+    local delimiter="" converted_value=""
+
+    delimiter="ghadelimiter_$(uuidgen)"
+    converted_value=$(core._toCommandValue "${value}")
 
     printf '%s<<%s\n%s\n%s\n' "${key}" "${delimiter}" "${converted_value}" "${delimiter}"
 }
@@ -483,7 +485,7 @@ core._issueLoggingCommand() {
             col | startColumn )  props+=( "col=${value}"  )  ;;
             title | file | endLine | endColumn ) props+=( "${key}=${value}" )  ;;
             * )
-                printf "::error title=%s()%3A Invalid property '%s'::The property '%s' is not a valid logging annotation property.\n" \
+                printf "::error title=%s()%%3A Invalid property '%s'::The property '%s' is not a valid logging annotation property.\n" \
                     "${FUNCNAME[1]}" "${key}" "${key}"
                 exit 1
             ;;
