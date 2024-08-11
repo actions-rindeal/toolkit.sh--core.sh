@@ -1,0 +1,32 @@
+name: 'Lint'
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  'trunk':
+    name: 'Trunk.io Check'
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write   # For trunk to post annotations
+      contents: read  # For repo checkout
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Trunk.io Check
+        uses: trunk-io/trunk-action@main
+        with:
+          # check-mode: all
+          #     check all files, default is differential
+          'check-mode': all
+          # --github-annotate-new-only=false
+          #     Annotate all issues, default is to only annotate new issues
+          'arguments': --github-annotate-new-only=false
+          'debug': false
+        env:
+          'TRUNK_LAUNCHER_QUIET': false
