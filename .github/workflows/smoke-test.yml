@@ -51,7 +51,7 @@ jobs:
         shell: >
           bash --noprofile --norc
           -o errexit -o pipefail -o nounset
-          -c "source $GITHUB_WORKSPACE/core.sh ; set +o verbose +o xtrace ; source '{0}'"
+          -c "source \"${GITHUB_WORKSPACE}/core.sh\" ; set +o verbose +o xtrace ; source '{0}'"
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
@@ -59,7 +59,7 @@ jobs:
       - name: 'Context'
         run: |
           pprint(){
-            echo "$( printf '`%s` ' "${@}" | sed 's/ $//' ) => '$( "${@}" )'"
+            echo "$( printf '`%s` ' "${@}" )=> '$( "${@}" )'"
           }
           pprint context.eventName
           pprint context.sha
