@@ -87,5 +87,5 @@ actions:
 
 tools:
   enabled:
-    - gh
-    - gt
+    - gh@>=1.0.0
+    - gt@>=1.0.0
