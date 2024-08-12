@@ -356,14 +356,14 @@ core._getoptInvalidArgErrorAndExit() {
     printf "::error title=%s%%3A Invalid options provided to getopt::%s\n" "${FUNCNAME[1]}" "${args}"
     exit 1
 }
-export -f  _getoptInvalidArgErrorAndExit
+export -f  core._getoptInvalidArgErrorAndExit
 
 ## @internal
 core._NotImplementedErrorAndExit() {
     printf "::error title=%s() is not implemented::\n" "${FUNCNAME[1]}"
     exit 1
 }
-export -f  _getoptInvalidArgErrorAndExit
+export -f  core._NotImplementedErrorAndExit
 
 ## @internal
 core._prepareKeyValueMessage() {
