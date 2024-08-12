@@ -666,15 +666,15 @@ export -f  summary.addCodeBlock
 #     summary.addList --ordered "First" "Second" "Third"
 ##
 summary.addList() {
-    local ordered=false tag='ul' items=() itemArgs=()
+    local tag='ul' items=() itemArgs=()
 
     local opts
     opts=$(getopt -o '' -l 'unordered,ul,ordered,ol' -- '' "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
-            --ol | --ordered   ) shift ; ordered=true  ; tag='ol' ;           ;;
-            --ul | --unordered ) shift ; ordered=false ; tag='ul' ;           ;;
+            --ol | --ordered   ) shift ; tag='ol' ;                           ;;
+            --ul | --unordered ) shift ; tag='ul' ;                           ;;
             --                 ) shift ; itemArgs=( "${@}" ) ; shift ${#@} ;  ;;
             * ) core._getoptInvalidArgErrorAndExit "${@}" ;                   ;;
         esac
@@ -1007,7 +1007,7 @@ context.repo() {
     if [[ -n "${GITHUB_REPOSITORY:-}" ]]; then
         repo_info=$(awk -F'/' '{printf "%s %s", $1, $2}' <<< "${GITHUB_REPOSITORY}")
     else
-        repo_info=$(context.payload | jq -r '(.repository.owner.login + " " + .repository.name) // empty')
+        repo_info=$(context.payload '(.repository.owner.login + " " + .repository.name) // empty')
     fi
 
     if [[ -z "${repo_info}" ]]; then
@@ -1025,7 +1025,7 @@ export -f  context.repo
 ##
 context.issue() {
     read -r owner repo <<< "$(context.repo)"
-    number=$(context.payload | jq -r '(.issue.number // .pull_request.number // .number) // empty')
+    number=$(context.payload '(.issue.number // .pull_request.number // .number) // empty')
     printf "%s %s %s" "${owner}" "${repo}" "${number}"
 }
 export -f  context.issue
