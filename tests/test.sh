@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #trunk-ignore-all(shellcheck/SC1083)  # This { is literal. Check expression (missing ;/\n?) or quote it.
 
+# shellcheck disable=SC1090
 source "${BACH_SH_PATH}"
+# shellcheck source=../core.sh
 source "${CORE_SH_PATH}"
 
 @setup {
