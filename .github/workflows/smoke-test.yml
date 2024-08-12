@@ -36,6 +36,7 @@ on:
   watch:
   workflow_call:
   workflow_run:
+    workflows: [ 'Lint' ]
   workflow_dispatch:
 
 permissions:
