@@ -682,6 +682,7 @@ summary.addList() {
         esac
     done
 
+    local item
     for item in "${itemArgs[@]}" ; do
         items+=( "<li>${item}</li>" )
     done
@@ -702,7 +703,7 @@ export -f  summary.addTable
 ##
 summary.startTable() {
     summary.addRaw "<table>" --eol
-    local cells=""
+    local cell cells=""
     for cell in "${@}" ; do
         cells+="<th>${cell}</th>"
     done
@@ -724,6 +725,7 @@ summary.addTableRow() {
         core.error "${FUNCNAME[0]}: No cells provided" "Function called with no arguments."
         exit 1
     fi
+    local cell
     for cell in "${@}" ; do
         row_cells+="<td>${cell}</td>"
     done
