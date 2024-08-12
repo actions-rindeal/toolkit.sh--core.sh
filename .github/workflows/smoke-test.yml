@@ -55,7 +55,7 @@ jobs:
 
       - name: 'Context'
         run: |
-          set -x
+          set -v
           echo "$(context.eventName)"
           echo "$(context.sha)"
           echo "$(context.ref)"
@@ -69,7 +69,7 @@ jobs:
           echo "$(context.apiUrl)"
           echo "$(context.serverUrl)"
           echo "$(context.graphqlUrl)"
-          echo "$(context.payload)"
+          echo "$(context.payload)" | jq . --color-output
           echo "$(context.payload ".sender.login")"
           echo "$(context.repo)"
           echo "$(context.issue)"
