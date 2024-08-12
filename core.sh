@@ -879,21 +879,19 @@ export -f  summary.addLink
 
 ## -------------------------------------------
 # @section  Context
-# @see  https://github.com/actions/toolkit/blob/main/packages/github/src/context.ts
-## -------------------------------------------
-
-##
-# @file github-context.sh
 # @brief Provides a GitHub Actions context similar to the TypeScript version
 # @description
 #     This script mimics the functionality of the TypeScript Context class
 #     for GitHub Actions. It provides functions to access GitHub Actions
 #     context information, closely mimicking the original API.
-##
+# @see  https://github.com/actions/toolkit/blob/f003268b3250d192cf66f306694b34a278011d9b/packages/github/src/context.ts
+## -------------------------------------------
 
 ##
 # @description Get the name of the event that triggered the workflow
 # @stdout The name of the event
+# @see GITHUB_EVENT_NAME
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.eventName() { printf "%s" "${GITHUB_EVENT_NAME:-}" ; }
 export -f  context.eventName
@@ -901,6 +899,8 @@ export -f  context.eventName
 ##
 # @description Get the SHA of the commit that triggered the workflow
 # @stdout The full SHA of the commit
+# @see GITHUB_SHA
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.sha() { printf "%s" "${GITHUB_SHA:-}" ; }
 export -f  context.sha
@@ -908,6 +908,8 @@ export -f  context.sha
 ##
 # @description Get the reference of the commit that triggered the workflow
 # @stdout The Git ref of the commit (e.g., refs/heads/main)
+# @see GITHUB_REF
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.ref() { printf "%s" "${GITHUB_REF:-}" ; }
 export -f  context.ref
@@ -915,13 +917,22 @@ export -f  context.ref
 ##
 # @description Get the name of the workflow
 # @stdout The name of the workflow
+# @see GITHUB_WORKFLOW
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.workflow() { printf "%s" "${GITHUB_WORKFLOW:-}" ; }
 export -f  context.workflow
 
 ##
-# @description Get the name of the current action
+# @description The name of the currently running action or the ID of a step.
+#              GitHub removes special characters and uses __run for steps that
+#              run scripts without an ID. If you reuse the same script or
+#              action within a job, the name includes a suffix with the
+#              sequence number (e.g., __run_2 or actionscheckout2 for the
+#              second invocation of actions/checkout).
 # @stdout The name of the current action
+# @see GITHUB_ACTION
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.action() { printf "%s" "${GITHUB_ACTION:-}" ; }
 export -f  context.action
@@ -929,6 +940,8 @@ export -f  context.action
 ##
 # @description Get the name of the actor that triggered the workflow
 # @stdout The name of the actor (usually a GitHub username)
+# @see GITHUB_ACTOR
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.actor() { printf "%s" "${GITHUB_ACTOR:-}" ; }
 export -f  context.actor
@@ -936,6 +949,8 @@ export -f  context.actor
 ##
 # @description Get the name of the current job
 # @stdout The name of the job
+# @see GITHUB_JOB
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.job() { printf "%s" "${GITHUB_JOB:-}" ; }
 export -f  context.job
@@ -943,6 +958,8 @@ export -f  context.job
 ##
 # @description Get the current attempt number of the job
 # @stdout The attempt number (as a string)
+# @see GITHUB_RUN_ATTEMPT
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.runAttempt() { printf "%s" "${GITHUB_RUN_ATTEMPT:-0}" ; }
 export -f  context.runAttempt
@@ -950,6 +967,8 @@ export -f  context.runAttempt
 ##
 # @description Get the current run number of the workflow
 # @stdout The run number (as a string)
+# @see GITHUB_RUN_NUMBER
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.runNumber() { printf "%s" "${GITHUB_RUN_NUMBER:-0}" ; }
 export -f  context.runNumber
@@ -957,6 +976,8 @@ export -f  context.runNumber
 ##
 # @description Get the unique identifier for the current workflow run
 # @stdout The run ID (as a string)
+# @see GITHUB_RUN_ID
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.runId() { printf "%s" "${GITHUB_RUN_ID:-0}" ; }
 export -f  context.runId
@@ -964,6 +985,8 @@ export -f  context.runId
 ##
 # @description Get the API URL for the current GitHub instance
 # @stdout The API URL (defaults to https://api.github.com)
+# @see GITHUB_API_URL
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.apiUrl() { printf "%s" "${GITHUB_API_URL:-https://api.github.com}" ; }
 export -f  context.apiUrl
@@ -971,6 +994,8 @@ export -f  context.apiUrl
 ##
 # @description Get the URL for the current GitHub instance
 # @stdout The server URL (defaults to https://github.com)
+# @see GITHUB_SERVER_URL
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.serverUrl() { printf "%s" "${GITHUB_SERVER_URL:-https://github.com}" ; }
 export -f  context.serverUrl
@@ -978,6 +1003,8 @@ export -f  context.serverUrl
 ##
 # @description Get the GraphQL API URL for the current GitHub instance
 # @stdout The GraphQL API URL (defaults to https://api.github.com/graphql)
+# @see GITHUB_GRAPHQL_URL
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.graphqlUrl() { printf "%s" "${GITHUB_GRAPHQL_URL:-https://api.github.com/graphql}" ; }
 export -f  context.graphqlUrl
@@ -1005,6 +1032,8 @@ export -f  context.payload
 # @description Get the owner and repository name
 # @stdout The owner and repository name separated by a space
 # @error If GITHUB_REPOSITORY is not set and can't be derived from the payload
+# @see GITHUB_REPOSITORY
+# @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
 context.repo() {
     local repo_info=""
