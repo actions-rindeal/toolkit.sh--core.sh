@@ -1,3 +1,4 @@
+---
 name: 'Lint'
 on:
   push:
@@ -30,3 +31,4 @@ jobs:
           'debug': false
         env:
           'TRUNK_LAUNCHER_QUIET': false
+...
