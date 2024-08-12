@@ -51,7 +51,7 @@ jobs:
         shell: >
           bash --noprofile --norc
           -o errexit -o pipefail -o nounset
-          -c "source ./core.sh ; echo $GITHUB_WORKSPACE ; set +o verbose +o xtrace ; source '{0}'"
+          -c "source $GITHUB_WORKSPACE/core.sh ; set +o verbose +o xtrace ; source '{0}'"
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
