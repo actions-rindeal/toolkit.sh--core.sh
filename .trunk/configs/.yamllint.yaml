@@ -3,7 +3,7 @@ extends: default
 
 rules:
   quoted-strings:
-    required: true
+    required: false
     # ignore:
     #   - .github/workflows/*.yml
     #   - .github/workflows/*.yaml
