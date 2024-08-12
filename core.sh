@@ -408,7 +408,9 @@ core._issueFileCommand() {
         return 1
     fi
 
-    printf '%s\n' "$(core._toCommandValue "${message}")" >> "${file_path}"
+    local command_value
+    command_value="$(core._toCommandValue "${message}")"
+    printf '%s\n' "${command_value}" >> "${file_path}"
 }
 export -f  core._issueFileCommand
 
@@ -606,7 +608,7 @@ summary.addRaw() {
     local text="" eol=false
     
     local opts=""
-    opts=$(getopt -o '' -l 'eol' -- '' "$@") || exit 1
+    opts=$(getopt -o '' -l 'eol' -- '' "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
@@ -617,7 +619,7 @@ summary.addRaw() {
     done
 
     __ACTIONS_CORE_SUMMARY_BUFFER_X4K92+="${text}"
-    $eol && summary.addEOL
+    "${eol}" && summary.addEOL
 }
 export -f  summary.addRaw
 
@@ -1024,8 +1026,9 @@ export -f  context.repo
 # @stdout The owner, repository name, and issue/PR number separated by spaces
 ##
 context.issue() {
+    # shellcheck disable=SC2312
     read -r owner repo <<< "$(context.repo)"
-    number=$(context.payload '(.issue.number // .pull_request.number // .number) // empty')
+    number="$(context.payload '(.issue.number // .pull_request.number // .number) // empty')"
     printf "%s %s %s" "${owner}" "${repo}" "${number}"
 }
 export -f  context.issue
