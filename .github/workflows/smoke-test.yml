@@ -74,9 +74,9 @@ jobs:
           pprint context.apiUrl
           pprint context.serverUrl
           pprint context.graphqlUrl
-          echo "::startgroup::context.payload =⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄"
+          echo "::group::context.payload =⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄"
           context.payload | jq . --color-output | sed 's|^|  |'
-          echo "::endgroup"
+          echo "::endgroup::"
           pprint context.payload ".sender.login"
           pprint context.repo
           pprint context.issue
