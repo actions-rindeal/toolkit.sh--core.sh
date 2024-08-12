@@ -59,7 +59,7 @@ lint:
     - rubocop
     - ruff
     - rustfmt
-    - semgrep
+    - semgrep@>=1.0.0
     - shellcheck
     - shfmt
     - sort-package-json
