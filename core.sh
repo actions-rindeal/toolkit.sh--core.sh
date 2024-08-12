@@ -86,14 +86,14 @@ core._getInput() {
     done
 
     if [[ ! -v "${name}" ]] ; then
-        core.error "${FUNCNAME}: Input not found." "Environment variable '${name}' does not exist."
+        core.error "${FUNCNAME[0]}: Input not found." "Environment variable '${name}' does not exist."
         return 1
     fi
 
     local value="${!name}"
 
     if "${required}" && [[ -z "${value}" ]] ; then
-        core.error "${FUNCNAME}: Required input is empty." "Input '${name}' was found empty, but its value was required to be non-empty."
+        core.error "${FUNCNAME[0]}: Required input is empty." "Input '${name}' was found empty, but its value was required to be non-empty."
         return 1
     fi
 
@@ -103,9 +103,9 @@ core._getInput() {
             printf "%s" "${value}"
             ;;
         multiline )
-            local IFS=$'\n'
             local -a lines
-            readarray -t lines <<< "${value}"
+            IFS=$'\n' readarray -t lines <<< "${value}"
+            local line
             for line in "${lines[@]}"; do
                 if [[ -n "${line}" ]]; then
                     "${trim}" && line="$(core._trim "${line}")"
@@ -123,7 +123,7 @@ core._getInput() {
             esac
             ;;
         * )
-            core.error "${FUNCNAME}: Invalid input type '${type}'"
+            core.error "${FUNCNAME[0]}: Invalid input type '${type}'"
             exit 1
             ;;
     esac
@@ -179,7 +179,9 @@ export -f core.getBooleanInput
 core.setOutput() {
     local name="${1}" ; shift
     local value="${1}" ; shift
-    core._issueFileCommand 'OUTPUT' "$(core._prepareKeyValueMessage "${name}" "${value}")"
+    local kv_message
+    kv_message="$(core._prepareKeyValueMessage "${name}" "${value}")"
+    core._issueFileCommand 'OUTPUT' "${kv_message}"
 }
 export -f  core.setOutput
 
@@ -310,7 +312,9 @@ export -f  core.endGroup
 core.saveState() {
     local name="${1}" ; shift
     local value="${1}" ; shift
-    core._issueFileCommand 'STATE' "$(core._prepareKeyValueMessage "${name}" "${value}")"
+    local kv_message
+    kv_message="$(core._prepareKeyValueMessage "${name}" "${value}")"
+    core._issueFileCommand 'STATE' "${kv_message}"
 }
 export -f  core.saveState
 
@@ -714,7 +718,7 @@ export -f summary.startTable
 summary.addTableRow() {
     local row_cells=""
     if (( $# <= 0 )) ; then
-        core.error "${FUNCNAME}: No cells provided" "Function called with no arguments."
+        core.error "${FUNCNAME[0]}: No cells provided" "Function called with no arguments."
         exit 1
     fi
     for cell in "${@}" ; do
@@ -774,7 +778,7 @@ summary.addImage() {
     done
 
     if [[ -z "${src}" ]] ; then
-        core.error "${FUNCNAME}: missing 'src'"
+        core.error "${FUNCNAME[0]}: missing 'src'"
         exit 1
     fi
 
@@ -985,7 +989,7 @@ context.payload() {
         jq -r "${query}" "${event_path}"
     else
         if [[ -n "${event_path}" ]]; then
-            core.error "${FUNCNAME}: GITHUB_EVENT_PATH does not exist" "The path '${event_path}' is unavailable."
+            core.error "${FUNCNAME[0]}: GITHUB_EVENT_PATH does not exist" "The path '${event_path}' is unavailable."
         fi
         printf "{}"
     fi
@@ -1006,7 +1010,7 @@ context.repo() {
     fi
 
     if [[ -z "${repo_info}" ]]; then
-        core.error "${FUNCNAME}: Unable to determine repository information" "Ensure GITHUB_REPOSITORY is set or the payload contains repository data."
+        core.error "${FUNCNAME[0]}: Unable to determine repository information" "Ensure GITHUB_REPOSITORY is set or the payload contains repository data."
         return 1
     fi
 
