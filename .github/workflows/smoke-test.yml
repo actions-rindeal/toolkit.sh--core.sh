@@ -44,7 +44,7 @@ permissions:
 
 jobs:
   'test':
-    name: 'Test some commands'
+    name: 'Smoke Test Bash Actions Core'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,11 +56,31 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@main
 
-      - name: 'Context'
+      - name: 'Setup test environment'
         run: |
-          pprint(){
+          # Helper functions
+          pprint() {
             echo "$( printf '`%s` ' "${@}" )=> '$( "${@}" )'"
           }
+          
+          assert_equal() {
+            if [[ "$1" != "$2" ]]; then
+              echo "::error::Assertion failed: Expected '$2', but got '$1'"
+              exit 1
+            fi
+          }
+          
+          assert_contains() {
+            if [[ "$1" != *"$2"* ]]; then
+              echo "::error::Assertion failed: Expected '$1' to contain '$2'"
+              exit 1
+            fi
+          }
+          declare -f >> ${GITHUB_WORKSPACE}/core.sh
+
+      - name: 'Test Context'
+        run: |
+          echo "::group::Testing Context Functions"
           pprint context.eventName
           pprint context.sha
           pprint context.ref
@@ -74,10 +94,105 @@ jobs:
           pprint context.apiUrl
           pprint context.serverUrl
           pprint context.graphqlUrl
-          echo "::group::context.payload =⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄"
-          context.payload | jq . --color-output | sed 's|^|  |'
+          
+          echo "Testing context.payload"
+          payload=$(context.payload)
+          assert_contains "$payload" "\"workflow\""
+          
+          echo "Testing context.repo"
+          repo=$(context.repo)
+          assert_contains "$repo" "actions-rindeal"
+          
+          echo "Testing context.issue"
+          issue=$(context.issue)
+          assert_contains "$issue" "actions-rindeal"
           echo "::endgroup::"
-          pprint context.payload ".sender.login"
-          pprint context.repo
-          pprint context.issue
-...
+
+      - name: 'Test Core Functions'
+        run: |
+          echo "::group::Testing Core Functions"
+          # Test exportVariable
+          core.exportVariable "TEST_VAR" "test_value"
+          assert_equal "$TEST_VAR" "test_value"
+          
+          # Test setSecret (we can't actually test the masking, but we can call the function)
+          core.setSecret "secret_value"
+          
+          # Test addPath
+          original_path="$PATH"
+          core.addPath "/test/path"
+          assert_contains "$PATH" "/test/path"
+          PATH="$original_path"  # Reset PATH
+          
+          # Test getInput (we'll simulate an input)
+          export INPUT_TEST_INPUT="test input value"
+          input_value=$(core.getInput "test_input")
+          assert_equal "$input_value" "test input value"
+          
+          # Test setOutput
+          core.setOutput "test_output" "test output value"
+          
+          # Test various logging functions
+          core.debug "This is a debug message"
+          core.error "This is an error message"
+          core.warning "This is a warning message"
+          core.notice "This is a notice"
+          core.info "This is an info message"
+          
+          # Test group functions
+          core.startGroup "Test Group"
+          echo "This is inside a group"
+          core.endGroup
+          
+          # Test state functions
+          core.saveState "TEST_STATE" "test state value"
+          state_value=$(core.getState "TEST_STATE")
+          assert_equal "$state_value" "test state value"
+          echo "::endgroup::"
+
+      - name: 'Test Summary Functions'
+        run: |
+          echo "::group::Testing Summary Functions"
+          summary.addRaw "This is raw text" --eol
+          summary.addCodeBlock "echo 'Hello, World!'" --lang "bash"
+          summary.addList "Item 1" "Item 2" "Item 3"
+          summary.addHeading "Test Heading" -l 2
+          summary.addSeparator
+          summary.addQuote "To be or not to be"
+          summary.addLink "GitHub" "https://github.com"
+          
+          content=$(summary.stringify)
+          assert_contains "$content" "This is raw text"
+          assert_contains "$content" "echo 'Hello, World!'"
+          assert_contains "$content" "<li>Item 1</li>"
+          assert_contains "$content" "<h2>Test Heading</h2>"
+          assert_contains "$content" "<hr>"
+          assert_contains "$content" "<blockquote>To be or not to be</blockquote>"
+          assert_contains "$content" "<a href=\"https://github.com\">GitHub</a>"
+          
+          summary.write
+          echo "::endgroup::"
+
+      - name: 'Test Error Handling'
+        run: |
+          echo "::group::Testing Error Handling"
+          # Test required input
+          if core.getInput --required "non_existent_input" 2>/dev/null; then
+            echo "::error::Expected error for missing required input"
+            exit 1
+          fi
+          
+          # Test invalid boolean input
+          export INPUT_INVALID_BOOL="not_a_bool"
+          if core.getBooleanInput "invalid_bool" 2>/dev/null; then
+            echo "::error::Expected error for invalid boolean input"
+            exit 1
+          fi
+          echo "::endgroup::"
+
+      - name: 'Verify Workflow Success'
+        run: |
+          echo "::group::Workflow Summary"
+          echo "All tests passed successfully!"
+          echo "Smoke test completed for Bash Actions Core"
+          echo "::endgroup::"
