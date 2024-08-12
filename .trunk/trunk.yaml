@@ -21,60 +21,60 @@ plugins:
 
 runtimes:
   enabled:
-    - go
-    - node
-    - python
-    - ruby
+    - go@>=1.0.0
+    - node@>=1.0.0
+    - python@>=1.0.0
+    - ruby@>=1.0.0
 
 lint:
   # By sourcing this plugin, repos will enable these linters
   enabled:
-    - actionlint@1.7.1
-    - bandit@1.7.9
-    - black@24.8.0
-    - buf-lint@1.31.0!
-    - buildifier@7.1.2
-    - cfnlint@1.9.5
-    - checkov@3.2.219
-    - clang-format@17.0.1
-    - clang-tidy@17.0.1
-    - clippy@1.71.1
-    - eslint@8.56.0
+    - actionlint
+    - bandit
+    - black
+    - buf-lint
+    - buildifier
+    - cfnlint
+    - checkov
+    - clang-format
+    - clang-tidy
+    - clippy
+    - eslint
     - git-diff-check
-    - gofmt@1.20.4
-    - golangci-lint@1.59.1
-    - hadolint@2.12.0
-    - isort@5.13.2
-    - markdownlint@0.41.0
-    - markdown-link-check@3.12.2
-    - mypy@1.11.1
-    - nancy@1.0.46
-    - osv-scanner@1.8.3
-    - oxipng@9.1.2
+    - gofmt
+    - golangci-lint
+    - hadolint
+    - isort
+    - markdownlint
+    - markdown-link-check
+    - mypy
+    - nancy
+    - osv-scanner
+    - oxipng
     - pragma-once
-    - prettier@3.3.3
-    - prisma@5.18.0
-    - pylint@3.2.6
-    - renovate@38.21.4
-    - rubocop@1.39.0
-    - ruff@0.5.6
-    - rustfmt@1.68.2
-    - semgrep@1.84.1
-    - shellcheck@0.10.0
-    - shfmt@3.6.0
-    - sort-package-json@2.10.0
-    - sql-formatter@15.3.2
-    - stylelint@16.8.1:
+    - prettier
+    - prisma
+    - pylint
+    - renovate
+    - rubocop
+    - ruff
+    - rustfmt
+    - semgrep
+    - shellcheck
+    - shfmt
+    - sort-package-json
+    - sql-formatter
+    - stylelint:
         packages:
-          - stylelint-config-standard-scss@13.1.0
-          - stylelint-config-clean-order@6.1.0
-    - svgo@3.3.2
-    - taplo@0.9.3
-    - terrascan@1.19.1
-    - trivy@0.54.1
-    - trufflehog@3.81.7
-    - trunk-toolbox@0.3.2
-    - yamllint@1.35.1
+          - stylelint-config-standard-scss
+          - stylelint-config-clean-order
+    - svgo
+    - taplo
+    - terrascan
+    - trivy
+    - trufflehog
+    - trunk-toolbox
+    - yamllint
 
 # By sourcing this plugin, repos will enable these actions
 actions:
