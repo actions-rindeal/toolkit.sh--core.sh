@@ -59,7 +59,7 @@ jobs:
       - name: 'Context'
         run: |
           pprint(){
-            echo "$( printf '`%s` ' "${@}" | sed 's/ $//' )='$( "${@}" )'"
+            echo "$( printf '`%s` ' "${@}" | sed 's/ $//' ) => '$( "${@}" )'"
           }
           pprint context.eventName
           pprint context.sha
@@ -74,7 +74,7 @@ jobs:
           pprint context.apiUrl
           pprint context.serverUrl
           pprint context.graphqlUrl
-          echo "context.payload="
+          echo "context.payload =⌄⌄⌄⌄⌄⌄⌄⌄⌄⌄"
           context.payload | jq . --color-output | sed 's|^|  |'
           pprint context.payload ".sender.login"
           pprint context.repo
