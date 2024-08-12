@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+#trunk-ignore-all(shellcheck/SC1083)  # This { is literal. Check expression (missing ;/\n?) or quote it.
+
 source "${BACH_SH_PATH}"
 source "${CORE_SH_PATH}"
 
