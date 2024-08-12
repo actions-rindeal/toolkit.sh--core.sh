@@ -213,6 +213,7 @@ export -f  core.setCommandEcho
 #     core.setFailedAndExit "No 'repo' input provided."
 #     core.setFailedAndExit "Invalid 'repo' input."  "Check 'repo' format: '%s'" "${REPO}"
 ##
+# shellcheck disable=SC2059
 core.setFailedAndExit() { printf "::error title=$1::${2-$1}\n" "${@:3}" ; exit 1 ; }
 export -f  core.setFailedAndExit
 
@@ -327,7 +328,7 @@ export -f  core.saveState
 core.getState() {
     local name="${1}" ; shift
     local var="STATE_${name}"
-    [[ -v "${var}" ]] && { printf "%s" "${!var}" ; } || { printf "" ; }
+    [[ -v "${var}" ]] && printf "%s" "${!var}"
 }
 export -f  core.getState
 
