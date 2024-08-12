@@ -56,21 +56,21 @@ jobs:
       - name: 'Context'
         run: |
           set -x
-          context.eventName
-          context.sha
-          context.ref
-          context.workflow
-          context.action
-          context.actor
-          context.job
-          context.runAttempt
-          context.runNumber
-          context.runId
-          context.apiUrl
-          context.serverUrl
-          context.graphqlUrl
-          context.payload
-          context.payload ".sender"
-          context.repo
-          context.issue
+          echo "$(context.eventName)"
+          echo "$(context.sha)"
+          echo "$(context.ref)"
+          echo "$(context.workflow)"
+          echo "$(context.action)"
+          echo "$(context.actor)"
+          echo "$(context.job)"
+          echo "$(context.runAttempt)"
+          echo "$(context.runNumber)"
+          echo "$(context.runId)"
+          echo "$(context.apiUrl)"
+          echo "$(context.serverUrl)"
+          echo "$(context.graphqlUrl)"
+          echo "$(context.payload)"
+          echo "$(context.payload ".sender")"
+          echo "$(context.repo)"
+          echo "$(context.issue)"
 ...
