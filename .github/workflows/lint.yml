@@ -2,7 +2,7 @@
 name: 'Lint'
 on:
   push:
-    branches: [ master ]
+    branches: [ 'master' ]
   workflow_dispatch:
 
 permissions:
@@ -16,18 +16,18 @@ jobs:
       checks: write   # For trunk to post annotations
       contents: read  # For repo checkout
     steps:
-      - name: Checkout
+      - name: 'Checkout'
         uses: actions/checkout@main
 
-      - name: Trunk.io Check
+      - name: 'Trunk.io Check'
         uses: trunk-io/trunk-action@main
         with:
           # check-mode: all
           #     check all files, default is differential
-          'check-mode': all
+          'check-mode': 'all'
           # --github-annotate-new-only=false
           #     Annotate all issues, default is to only annotate new issues
-          'arguments': --github-annotate-new-only=false
+          'arguments': '--github-annotate-new-only=false'
           'debug': false
         env:
           'TRUNK_LAUNCHER_QUIET': false
