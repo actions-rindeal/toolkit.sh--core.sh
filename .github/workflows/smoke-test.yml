@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ./core.sh ; set +o verbose +o xtrace ; source '{0}'"
+        shell: stdbuf -o0 -e0 bash --noprofile --norc -o errexit -o pipefail -o nounset -c "source ./core.sh ; set +o verbose +o xtrace ; source '{0}'"
     steps:
       - name: 'Checkout'
         uses: actions/checkout@main
