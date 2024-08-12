@@ -55,8 +55,8 @@ jobs:
 
       - name: 'Context'
         run: |
-          BASH_XTRACEFD=4
-          set -v
+          BASH_XTRACEFD=1
+          set -x
           echo "$(context.eventName)"
           echo "$(context.sha)"
           echo "$(context.ref)"
