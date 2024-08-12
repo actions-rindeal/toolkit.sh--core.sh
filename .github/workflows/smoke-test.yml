@@ -70,7 +70,7 @@ jobs:
           echo "$(context.serverUrl)"
           echo "$(context.graphqlUrl)"
           echo "$(context.payload)"
-          echo "$(context.payload ".sender")"
+          echo "$(context.payload ".sender.login")"
           echo "$(context.repo)"
           echo "$(context.issue)"
 ...
