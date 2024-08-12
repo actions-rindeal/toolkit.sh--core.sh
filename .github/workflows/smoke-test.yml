@@ -58,23 +58,25 @@ jobs:
 
       - name: 'Context'
         run: |
-          BASH_XTRACEFD=1
-          set -x
-          echo "$(context.eventName)"
-          echo "$(context.sha)"
-          echo "$(context.ref)"
-          echo "$(context.workflow)"
-          echo "$(context.action)"
-          echo "$(context.actor)"
-          echo "$(context.job)"
-          echo "$(context.runAttempt)"
-          echo "$(context.runNumber)"
-          echo "$(context.runId)"
-          echo "$(context.apiUrl)"
-          echo "$(context.serverUrl)"
-          echo "$(context.graphqlUrl)"
-          echo "$(context.payload)" | jq . --color-output
-          echo "$(context.payload ".sender.login")"
-          echo "$(context.repo)"
-          echo "$(context.issue)"
+          pprint(){
+            echo "$( printf '`%s` ' "${@}" | sed 's/ $//' )='$( "${@}" )'"
+          }
+          pprint context.eventName
+          pprint context.sha
+          pprint context.ref
+          pprint context.workflow
+          pprint context.action
+          pprint context.actor
+          pprint context.job
+          pprint context.runAttempt
+          pprint context.runNumber
+          pprint context.runId
+          pprint context.apiUrl
+          pprint context.serverUrl
+          pprint context.graphqlUrl
+          echo "context.payload="
+          context.payload | jq . --color-output | sed 's|^|  |'
+          pprint context.payload ".sender.login"
+          pprint context.repo
+          pprint context.issue
 ...
