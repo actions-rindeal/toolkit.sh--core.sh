@@ -110,6 +110,7 @@ jobs:
 
       - name: 'Test Core Functions'
         run: |
+          set -vx
           echo "::group::Testing Core Functions"
           # Test exportVariable
           core.exportVariable "TEST_VAR" "test_value"
