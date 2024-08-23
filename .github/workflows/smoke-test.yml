@@ -109,7 +109,7 @@ jobs:
           
           echo "::group::Testing context.issue"
           context.issue
-          context.issue | read -r owner repo issue
+          read -r owner repo issue <<< "$(context.issue)"
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           if [[ -n "${issue}" ]] ; then
             (( issue > 0 ))
