@@ -94,6 +94,7 @@ jobs:
           for i in {1..10} ; do
             echo "This is line #${i} inside a group"
           done
+          set -vx
           core.endGroup
 
       - name: 'Test Context'
