@@ -53,6 +53,16 @@ jobs:
           -o errexit -o pipefail -o nounset
           -c "source ${{github.workspace}}/core.sh ; set +o verbose +o xtrace ; source '{0}'"
     steps:
+      - uses: actions/github-script@HEAD
+        with:
+          script: |
+            const fs = require('fs')
+            core.exportVariable('MY_VAR', 'foo bar baz')
+            fs.readFile(process.env.GITHUB_ENV, 'utf8', (err, data) => {
+              if (err) return console.error('Error reading the file:', err)
+              console.log(data)
+            })
+    
       - name: 'Checkout'
         uses: actions/checkout@main
 
