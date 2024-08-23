@@ -99,9 +99,9 @@ jobs:
           echo "::group::Testing context.payload"
           context.payload | jq --color-output
           echo "::endgroup::"
-          
-          echo "::group::Testing context.repo"
+
           set -vx
+          echo "::group::Testing context.repo"
           context.repo
           context.repo | read -r owner repo
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
