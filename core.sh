@@ -445,8 +445,10 @@ export -f  core._escapeProperty
 ## @arg $2 Message (optional)
 ## @arg $@ Properties in the format `propName=propVal`
 core._issueCommand() {
-    local command="${1:-missing.command}" ; shift
-    local message="${1:-}" ; shift
+    local command="${1:-missing.command}"
+    (( $# )) && shift || true
+    local message="${1:-}"
+    (( $# )) && shift || true
     local properties=( "$@" )
 
     local cmdStr="::${command}"
@@ -1018,6 +1020,7 @@ export -f  context.graphqlUrl
 ##
 context.payload() {
     local query="${1:-.}"
+    (( $# )) && shift || true
     local event_path="${GITHUB_EVENT_PATH:-}"
     if [[ -n "${event_path}" && -f "${event_path}" ]]; then
         jq -r "${query}" "${event_path}"
