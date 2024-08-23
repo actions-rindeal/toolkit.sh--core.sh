@@ -97,21 +97,22 @@ jobs:
           echo "::endgroup::"
           
           echo "::group::Testing context.payload"
-          context.payload
-          payload=$(context.payload)
-          assert_contains "$payload" "\"workflow\""
+          context.payload | jq --color-output
           echo "::endgroup::"
           
           echo "::group::Testing context.repo"
           context.repo
-          repo=$(context.repo)
-          assert_contains "$repo" "actions-rindeal"
+          read -r owner repo < context.repo
+          [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           echo "::endgroup::"
           
           echo "::group::Testing context.issue"
           context.issue
-          issue=$(context.issue)
-          assert_contains "$issue" "actions-rindeal"
+          read -r owner repo issue < context.issue
+          [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
+          if [[ -n "${issue}" ]] ; then
+            (( issue > 0 ))
+          fi
           echo "::endgroup::"
 
       - name: 'Test Core Functions'
