@@ -74,7 +74,7 @@ core._getInput() {
     local name required=false trim=true type="string"
     
     local opts
-    opts=$(getopt --long required,no-trim,type: -- "$@") || exit 1
+    opts=$(getopt -o '' --long required,no-trim,type: -- "$@") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
     case "${1}" in
