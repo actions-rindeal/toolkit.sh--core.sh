@@ -103,7 +103,7 @@ jobs:
           set -vx
           echo "::group::Testing context.repo"
           context.repo
-          context.repo | read -r owner repo
+          read -r owner repo <<< "$(context.repo)"
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           echo "::endgroup::"
           
