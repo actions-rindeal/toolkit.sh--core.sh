@@ -102,13 +102,13 @@ jobs:
           
           echo "::group::Testing context.repo"
           context.repo
-          read -r owner repo < context.repo
+          context.repo | read -r owner repo
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           echo "::endgroup::"
           
           echo "::group::Testing context.issue"
           context.issue
-          read -r owner repo issue < context.issue
+          context.issue | read -r owner repo issue
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           if [[ -n "${issue}" ]] ; then
             (( issue > 0 ))
