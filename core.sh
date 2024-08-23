@@ -387,7 +387,8 @@ core._toCommandValue() {
     elif [[ "${input}" == true || "${input}" == false || "${input}" =~ ^[0-9]+$ ]]; then
         printf '%s\n' "${input}"
     else
-        printf '%s\n' "${input}" | jq -R -s '.'
+        #  | jq -R -s '.'
+        printf '%s\n' "${input}"
     fi
 }
 export -f  core._toCommandValue
