@@ -1057,7 +1057,7 @@ export -f  context.repo
 # @stdout The owner, repository name, and issue/PR number separated by spaces
 ##
 context.issue() {
-    context.repo | read -r owner repo
+    read -r owner repo <<< "$(context.repo)"
     number="$(context.payload '(.issue.number // .pull_request.number // .number) // empty')"
     printf "%s %s %s" "${owner}" "${repo}" "${number}"
 }
