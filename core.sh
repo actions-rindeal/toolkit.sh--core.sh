@@ -28,9 +28,10 @@
 core.exportVariable() {
     local name="${1}" ; shift
     local value="${1}" ; shift
-    export "${name}=${value}"
-    local kv_message
+    local kv_message="" converted_value=""
+    converted_value="$(core._toCommandValue "${value}")"
     kv_message="$(core._prepareKeyValueMessage "${name}" "${value}")"
+    export "${name}=${converted_value}"
     core._issueFileCommand 'ENV' "${kv_message}"
 }
 export -f  core.exportVariable
