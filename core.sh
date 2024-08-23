@@ -74,7 +74,7 @@ core._getInput() {
     local name required=false trim=true type="string"
     
     local opts
-    opts=$(getopt --long required,no-trim,type: -- '' "$@") || exit 1
+    opts=$(getopt --long required,no-trim,type: -- "$@") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
     case "${1}" in
@@ -528,7 +528,7 @@ summary.write() {
     local overwrite=false
     
     local opts
-    opts=$(getopt -o '' -l 'overwrite' -- '' "$@") || exit 1
+    opts=$(getopt -o '' -l 'overwrite' -- "$@") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
@@ -612,7 +612,7 @@ summary.addRaw() {
     local text="" eol=false
     
     local opts=""
-    opts=$(getopt -o '' -l 'eol' -- '' "${@}") || exit 1
+    opts=$(getopt -o '' -l 'eol' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
@@ -646,7 +646,7 @@ summary.addCodeBlock() {
     local code="" lang="" attrs=("")
 
     local opts=""
-    opts=$(getopt -o 'l' -l 'lang,language' -- '' "${@}") || exit 1
+    opts=$(getopt -o 'l' -l 'lang,language' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
@@ -675,7 +675,7 @@ summary.addList() {
     local tag='ul' items=() itemArgs=()
 
     local opts
-    opts=$(getopt -o '' -l 'unordered,ul,ordered,ol' -- '' "${@}") || exit 1
+    opts=$(getopt -o '' -l 'unordered,ul,ordered,ol' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
@@ -775,7 +775,7 @@ summary.addImage() {
     local src="" alt="" width="" height="" attrs=("")
     
     local opts
-    opts=$(getopt -o 'w:h:' -l 'width:,height:' -- '' "${@}") || exit 1
+    opts=$(getopt -o 'w:h:' -l 'width:,height:' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
@@ -812,7 +812,7 @@ summary.addHeading() {
     local text="" level=""
 
     local opts
-    opts=$(getopt -o 'h:l:' -l 'lvl:,level:' -- '' "${@}") || exit 1
+    opts=$(getopt -o 'h:l:' -l 'lvl:,level:' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
