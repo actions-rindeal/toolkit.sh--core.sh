@@ -88,9 +88,17 @@ jobs:
           }
           declare -f >> ${GITHUB_WORKSPACE}/core.sh
 
+      - name: 'Test Grouping of lines'
+        run: |
+          core.startGroup "Test Group"
+          for i in {1..10} ; do
+            echo "This is line #${i} inside a group"
+          done
+          core.endGroup
+
       - name: 'Test Context'
         run: |
-          echo "::group::Testing Basic Context Functions"
+          core.group "Testing Basic Context Functions"
           pprint context.eventName
           pprint context.sha
           pprint context.ref
@@ -104,37 +112,37 @@ jobs:
           pprint context.apiUrl
           pprint context.serverUrl
           pprint context.graphqlUrl
-          echo "::endgroup::"
+          core.endGroup
           
-          echo "::group::Testing context.payload"
+          core.group "Testing context.payload"
           context.payload | jq --color-output
-          echo "::endgroup::"
+          core.endGroup
 
-          set -vx
-          echo "::group::Testing context.repo"
+          core.group "Testing context.repo"
           context.repo
           read -r owner repo <<< "$(context.repo)"
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
-          echo "::endgroup::"
+          core.endGroup
           
-          echo "::group::Testing context.issue"
+          core.group "Testing context.issue"
           context.issue
           read -r owner repo issue <<< "$(context.issue)"
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           if [[ -n "${issue}" ]] ; then
             (( issue > 0 ))
           fi
-          echo "::endgroup::"
+          core.endGroup
 
       - name: 'Test Core Functions'
         run: |
           set -vx
-          echo "::group::Testing Core Functions"
-          # Test exportVariable
+
+          core.group "Testing core.exportVariable()"
           core.exportVariable "TEST_VAR" "test_value"
           assert_equal "$TEST_VAR" "test_value"
           cat "${GITHUB_ENV}"
           cat "${GITHUB_ENV}" | hexdump -c
+          core.endGroup
           
           # Test setSecret (we can't actually test the masking, but we can call the function)
           core.setSecret "secret_value"
@@ -160,16 +168,10 @@ jobs:
           core.notice "This is a notice"
           core.info "This is an info message"
           
-          # Test group functions
-          core.startGroup "Test Group"
-          echo "This is inside a group"
-          core.endGroup
-          
           # Test state functions
           core.saveState "TEST_STATE" "test state value"
           state_value=$(core.getState "TEST_STATE")
           assert_equal "$state_value" "test state value"
-          echo "::endgroup::"
 
       - name: 'Test Summary Functions'
         run: |
