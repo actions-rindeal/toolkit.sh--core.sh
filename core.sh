@@ -384,9 +384,9 @@ core._toCommandValue() {
     if [[ -z "${input}" ]]; then
         printf ''
     elif [[ "${input}" == true || "${input}" == false || "${input}" =~ ^[0-9]+$ ]]; then
-        printf '%s' "${input}"
+        printf '%s\n' "${input}"
     else
-        printf '%s' "${input}" | jq -R -s '.'
+        printf '%s\n' "${input}" | jq -R -s '.'
     fi
 }
 export -f  core._toCommandValue
@@ -420,7 +420,7 @@ core._escapeData() {
     str="${str//%/%25}"
     str="${str//$'\r'/%0D}"
     str="${str//$'\n'/%0A}"
-    printf '%s' "${str}"
+    printf '%s\n' "${str}"
 }
 export -f  core._escapeData
 
@@ -432,7 +432,7 @@ core._escapeProperty() {
     str="${str//$'\n'/%0A}"
     str="${str//:/%3A}"
     str="${str//,/%2C}"
-    printf '%s' "${str}"
+    printf '%s\n' "${str}"
 }
 export -f  core._escapeProperty
 
@@ -463,7 +463,7 @@ core._issueCommand() {
     cmdStr+="::"
     [[ -n "${message}" ]] && cmdStr+="$(core._escapeData "${message}")"
 
-    printf '%s' "${cmdStr}"
+    printf '%s\n' "${cmdStr}"
 }
 export -f  core._issueCommand
 
@@ -893,7 +893,7 @@ export -f  summary.addLink
 # @see GITHUB_EVENT_NAME
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.eventName() { printf "%s" "${GITHUB_EVENT_NAME:-}" ; }
+context.eventName() { printf "%s\n" "${GITHUB_EVENT_NAME:-}" ; }
 export -f  context.eventName
 
 ##
@@ -902,7 +902,7 @@ export -f  context.eventName
 # @see GITHUB_SHA
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.sha() { printf "%s" "${GITHUB_SHA:-}" ; }
+context.sha() { printf "%s\n" "${GITHUB_SHA:-}" ; }
 export -f  context.sha
 
 ##
@@ -911,7 +911,7 @@ export -f  context.sha
 # @see GITHUB_REF
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.ref() { printf "%s" "${GITHUB_REF:-}" ; }
+context.ref() { printf "%s\n" "${GITHUB_REF:-}" ; }
 export -f  context.ref
 
 ##
@@ -920,7 +920,7 @@ export -f  context.ref
 # @see GITHUB_WORKFLOW
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.workflow() { printf "%s" "${GITHUB_WORKFLOW:-}" ; }
+context.workflow() { printf "%s\n" "${GITHUB_WORKFLOW:-}" ; }
 export -f  context.workflow
 
 ##
@@ -934,7 +934,7 @@ export -f  context.workflow
 # @see GITHUB_ACTION
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.action() { printf "%s" "${GITHUB_ACTION:-}" ; }
+context.action() { printf "%s\n" "${GITHUB_ACTION:-}" ; }
 export -f  context.action
 
 ##
@@ -943,7 +943,7 @@ export -f  context.action
 # @see GITHUB_ACTOR
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.actor() { printf "%s" "${GITHUB_ACTOR:-}" ; }
+context.actor() { printf "%s\n" "${GITHUB_ACTOR:-}" ; }
 export -f  context.actor
 
 ##
@@ -952,7 +952,7 @@ export -f  context.actor
 # @see GITHUB_JOB
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.job() { printf "%s" "${GITHUB_JOB:-}" ; }
+context.job() { printf "%s\n" "${GITHUB_JOB:-}" ; }
 export -f  context.job
 
 ##
@@ -961,7 +961,7 @@ export -f  context.job
 # @see GITHUB_RUN_ATTEMPT
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.runAttempt() { printf "%s" "${GITHUB_RUN_ATTEMPT:-0}" ; }
+context.runAttempt() { printf "%s\n" "${GITHUB_RUN_ATTEMPT:-0}" ; }
 export -f  context.runAttempt
 
 ##
@@ -970,7 +970,7 @@ export -f  context.runAttempt
 # @see GITHUB_RUN_NUMBER
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.runNumber() { printf "%s" "${GITHUB_RUN_NUMBER:-0}" ; }
+context.runNumber() { printf "%s\n" "${GITHUB_RUN_NUMBER:-0}" ; }
 export -f  context.runNumber
 
 ##
@@ -979,7 +979,7 @@ export -f  context.runNumber
 # @see GITHUB_RUN_ID
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.runId() { printf "%s" "${GITHUB_RUN_ID:-0}" ; }
+context.runId() { printf "%s\n" "${GITHUB_RUN_ID:-0}" ; }
 export -f  context.runId
 
 ##
@@ -988,7 +988,7 @@ export -f  context.runId
 # @see GITHUB_API_URL
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.apiUrl() { printf "%s" "${GITHUB_API_URL:-https://api.github.com}" ; }
+context.apiUrl() { printf "%s\n" "${GITHUB_API_URL:-https://api.github.com}" ; }
 export -f  context.apiUrl
 
 ##
@@ -997,7 +997,7 @@ export -f  context.apiUrl
 # @see GITHUB_SERVER_URL
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.serverUrl() { printf "%s" "${GITHUB_SERVER_URL:-https://github.com}" ; }
+context.serverUrl() { printf "%s\n" "${GITHUB_SERVER_URL:-https://github.com}" ; }
 export -f  context.serverUrl
 
 ##
@@ -1006,7 +1006,7 @@ export -f  context.serverUrl
 # @see GITHUB_GRAPHQL_URL
 # @see https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/variables#default-environment-variables
 ##
-context.graphqlUrl() { printf "%s" "${GITHUB_GRAPHQL_URL:-https://api.github.com/graphql}" ; }
+context.graphqlUrl() { printf "%s\n" "${GITHUB_GRAPHQL_URL:-https://api.github.com/graphql}" ; }
 export -f  context.graphqlUrl
 
 ##
@@ -1023,7 +1023,7 @@ context.payload() {
         if [[ -n "${event_path}" ]]; then
             core.error "${FUNCNAME[0]}: GITHUB_EVENT_PATH does not exist" "The path '${event_path}' is unavailable."
         fi
-        printf "{}"
+        printf "{}\n"
     fi
 }
 export -f  context.payload
@@ -1048,7 +1048,7 @@ context.repo() {
         return 1
     fi
 
-    printf "%s" "${repo_info}"
+    printf "%s\n" "${repo_info}"
 }
 export -f  context.repo
 
@@ -1059,6 +1059,6 @@ export -f  context.repo
 context.issue() {
     read -r owner repo <<< "$(context.repo)"
     number="$(context.payload '(.issue.number // .pull_request.number // .number) // empty')"
-    printf "%s %s %s" "${owner}" "${repo}" "${number}"
+    printf "%s %s %s\n" "${owner}" "${repo}" "${number}"
 }
 export -f  context.issue
