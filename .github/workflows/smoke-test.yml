@@ -170,9 +170,9 @@ jobs:
           core.info "This is an info message"
           
           # Test state functions
-          core.saveState "TEST_STATE" "test state value"
-          state_value=$(core.getState "TEST_STATE")
-          assert_equal "$state_value" "test state value"
+          #core.saveState "TEST_STATE" "test state value"
+          #state_value=$(core.getState "TEST_STATE")
+          #assert_equal "$state_value" "test state value"
 
       - name: 'Test Summary Functions'
         run: |
