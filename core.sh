@@ -646,12 +646,12 @@ summary.addCodeBlock() {
     local code="" lang="" attrs=("")
 
     local opts=""
-    opts=$(getopt -o 'l' -l 'lang,language' -- "${@}") || exit 1
+    opts=$(getopt -o 'l:' -l 'lang:,language:' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
             -l | --lang | --language ) shift ; lang="${1}" ; shift 1 ;  ;;
-            --                       ) shift ; code="${1}"   ; shift 1 ;  ;;
+            --                       ) shift ; code="${1}" ; shift 1 ;  ;;
             * ) core._getoptInvalidArgErrorAndExit "${@}" ;  ;;
         esac
     done
@@ -675,14 +675,14 @@ summary.addList() {
     local tag='ul' items=() itemArgs=()
 
     local opts
-    opts=$(getopt -o '' -l 'unordered,ul,ordered,ol' -- "${@}") || exit 1
+    opts=$(getopt -o 'ou' -l 'ordered,ol,unordered,ul' -- "${@}") || exit 1
     eval set -- "${opts}"
     while (( $# > 0 )) ; do
         case "${1}" in
-            --ol | --ordered   ) shift ; tag='ol' ;                           ;;
-            --ul | --unordered ) shift ; tag='ul' ;                           ;;
-            --                 ) shift ; itemArgs=( "${@}" ) ; shift ${#@} ;  ;;
-            * ) core._getoptInvalidArgErrorAndExit "${@}" ;                   ;;
+            -o | --ol | --ordered   ) shift ; tag='ol' ;      ;;
+            -u | --ul | --unordered ) shift ; tag='ul' ;      ;;
+            -- ) shift ; itemArgs=( "${@}" ) ; shift ${#@} ;  ;;
+            * ) core._getoptInvalidArgErrorAndExit "${@}" ;   ;;
         esac
     done
 
