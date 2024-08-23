@@ -31,7 +31,7 @@ on:
   release:
   repository_dispatch:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 1 * *'
   status:
   watch:
   workflow_call:
@@ -80,7 +80,7 @@ jobs:
 
       - name: 'Test Context'
         run: |
-          echo "::group::Testing Context Functions"
+          echo "::group::Testing Basic Context Functions"
           pprint context.eventName
           pprint context.sha
           pprint context.ref
@@ -94,16 +94,22 @@ jobs:
           pprint context.apiUrl
           pprint context.serverUrl
           pprint context.graphqlUrl
+          echo "::endgroup::"
           
-          echo "Testing context.payload"
+          echo "::group::Testing context.payload"
+          context.payload
           payload=$(context.payload)
           assert_contains "$payload" "\"workflow\""
+          echo "::endgroup::"
           
-          echo "Testing context.repo"
+          echo "::group::Testing context.repo"
+          context.repo
           repo=$(context.repo)
           assert_contains "$repo" "actions-rindeal"
+          echo "::endgroup::"
           
-          echo "Testing context.issue"
+          echo "::group::Testing context.issue"
+          context.issue
           issue=$(context.issue)
           assert_contains "$issue" "actions-rindeal"
           echo "::endgroup::"
@@ -115,6 +121,8 @@ jobs:
           # Test exportVariable
           core.exportVariable "TEST_VAR" "test_value"
           assert_equal "$TEST_VAR" "test_value"
+          cat "${GITHUB_ENV}"
+          cat "${GITHUB_ENV}" | hexdump -c
           
           # Test setSecret (we can't actually test the masking, but we can call the function)
           core.setSecret "secret_value"
