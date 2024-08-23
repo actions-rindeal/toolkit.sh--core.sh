@@ -99,7 +99,7 @@ jobs:
 
       - name: 'Test Context'
         run: |
-          core.group "Testing Basic Context Functions"
+          core.startGroup "Testing Basic Context Functions"
           pprint context.eventName
           pprint context.sha
           pprint context.ref
@@ -115,17 +115,17 @@ jobs:
           pprint context.graphqlUrl
           core.endGroup
           
-          core.group "Testing context.payload"
+          core.startGroup "Testing context.payload"
           context.payload | jq --color-output
           core.endGroup
 
-          core.group "Testing context.repo"
+          core.startGroup "Testing context.repo"
           context.repo
           read -r owner repo <<< "$(context.repo)"
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
           core.endGroup
           
-          core.group "Testing context.issue"
+          core.startGroup "Testing context.issue"
           context.issue
           read -r owner repo issue <<< "$(context.issue)"
           [[ "${owner}/${repo}" == "${GITHUB_REPOSITORY}" ]]
@@ -138,7 +138,7 @@ jobs:
         run: |
           set -vx
 
-          core.group "Testing core.exportVariable()"
+          core.startGroup "Testing core.exportVariable()"
           core.exportVariable "TEST_VAR" "test_value"
           assert_equal "$TEST_VAR" "test_value"
           cat "${GITHUB_ENV}"
